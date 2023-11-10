@@ -12,7 +12,6 @@ spring:
 mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
 # 开发环境端口号
 server:
   port: 8089
