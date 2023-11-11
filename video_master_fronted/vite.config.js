@@ -19,6 +19,13 @@ export default defineConfig({
                 target: 'http://192.168.32.137/resources',
                 changeOrigin: true,
                 rewrite: path => path.replace(/^\/resources/, '')
+            },
+
+            //后台程序
+            '/video-master':{
+                target: "http://127.0.0.1:8089/video-master",
+                changeOrigin: true,
+                rewrite: path => path.replace(/^\/video-master/, '')
             }
         }
     }

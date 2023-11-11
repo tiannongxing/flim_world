@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.video_master.video_master_backend.mapper")
 public class VideoMasterBackendApplication {
 
     public static void main(String[] args) {

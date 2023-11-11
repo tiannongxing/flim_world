@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class JackonUtil {
      private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -30,4 +33,12 @@ public class JackonUtil {
             throw new RuntimeException(e);
         }
     }
+
+   public static String ListToJson(List list){
+       try {
+           return objectMapper.writeValueAsString(list);
+       } catch (JsonProcessingException e) {
+           throw new RuntimeException(e);
+       }
+   }
 }

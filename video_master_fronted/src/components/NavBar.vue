@@ -1,14 +1,10 @@
 <script setup>
-import {animate_controller, animate_controller_double_stage} from "../utils/AnimateSeletor.js";
 import {onMounted, reactive, ref} from "vue";
 import {
   AppstoreAddOutlined,
-  FieldTimeOutlined,
-  NotificationOutlined,
   PoweroffOutlined,
   RightOutlined,
   SisternodeOutlined,
-  StarOutlined,
   UserOutlined
 } from "@ant-design/icons-vue";
 
@@ -45,7 +41,7 @@ let onSearch = () => {
 }
 let avatar_animate = ref('')
 const animate_list = ref(['avatar_magnify', 'avatar_shrink', 'user_display_show', 'user_display_hidden'])
-let header_image = ref('/imgs/avatar/unlogin.png?width=128')
+let header_image = ref('/static/unlogin.png')
 let is_login = ref(false)
 let show_user_display = ref(false)
 let login = () => {
@@ -57,6 +53,7 @@ let register = () => {
 let display_user_panel = ref('')
 let font_color = ref(font_color_list.unselect)
 let display_sub_user_panel = ref('')
+let selected = ref("index")
 
 </script>
 
@@ -68,7 +65,34 @@ let display_sub_user_panel = ref('')
         <img width="200" src="/static/logo.png" @click="title_img_click">
       </a-col>
       <!--类别-->
-      <a-col :span="7">
+      <a-col :span="7" style="margin-left: 3em">
+        <a-row class="vertical_center margin-top-tiny">
+          <a-col :span="4" class="nav-font-huge">
+            <div class="select_button">
+              首页
+            </div>
+          </a-col>
+          <a-col :span="4" class="nav-font-huge">
+            <div class="select_button">
+              电影
+            </div>
+          </a-col>
+          <a-col :span="4" class="nav-font-huge">
+            <div class="select_button">
+              动漫
+            </div>
+          </a-col >
+          <a-col :span="5" class="nav-font-huge">
+            <div class="select_button">
+              电视剧
+            </div>
+          </a-col>
+          <a-col :span="4" class="nav-font-huge">
+            <div class="select_button">
+              儿童
+            </div>
+          </a-col>
+        </a-row>
       </a-col>
       <!--搜索框-->
       <a-col :span="7">
@@ -252,9 +276,8 @@ let display_sub_user_panel = ref('')
           </a-col>
         </a-row>
       </a-col>
-      <!--后台-->
-      <a-col :span="3">
-        后台
+      <a-col :span="3" style="transform:translateY(25%)">
+          <a-typography-text class="backend nav-font-huge user_select_forbidden" onclick="alert('进入后台')">后台</a-typography-text>
       </a-col>
     </a-row>
   </div>
@@ -342,5 +365,27 @@ let display_sub_user_panel = ref('')
   cursor: pointer;
 }
 
+.select_button {
+  display: inline-block;
+  height: 2em;
+  color: #B3B3B3;
+}
+
+.select_button:hover{
+  color: white;
+  border-bottom: 3px solid #5FB878;
+}
+vertical_align_center{
+  height: calc(100%);
+  line-height: calc(100%);
+}
+
+.backend{
+  color: #B3B3B3;
+}
+
+.backend:hover{
+  color: white;
+}
 
 </style>

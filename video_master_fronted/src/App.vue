@@ -11,7 +11,11 @@ const recommend_types = ref(["电影", "电视剧", "动漫", "综艺"])
 <template>
   <nav-bar class="navbar_style"></nav-bar>
   <carousel-map></carousel-map>
-  <recommend-unit :recommend_type="recommend_types[0]"></recommend-unit>
+  <div v-for="type in recommend_types">
+    <recommend-unit :recommend_type="type"></recommend-unit>
+  </div>
+
+
 <!--  <router-view>-->
 <!--    -->
 <!--  </router-view>-->

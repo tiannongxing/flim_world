@@ -204,6 +204,10 @@ div {
     height: 100%;
 }
 
+.user_select_forbidden{
+    user-select: none;
+}
+
 
 
 /* 通过webkit扩展修改滚动条样式仅限于chrome，safari和opera的滚动条 */

@@ -4,9 +4,7 @@ import axios from "axios";
 
 let page_variable = reactive({
   recommend_type : "",
-  recommend_imgs_data:[
-
-  ],
+  recommend_imgs_data:"",
 })
 
 const param = defineProps({
@@ -16,14 +14,22 @@ const param = defineProps({
 
 page_variable.recommend_type = param.recommend_type;
 // 从后台获取影片图片和连接
-axios.get()
+axios.get(`/video-master/resource/getByName?name="${page_variable.recommend_type}"`)
+    .then(
+        //处理成功
+        function (res){
+          page_variable.recommend_imgs_data=res.data;
+        }
+    ).catch(
+        //处理失败
+)
 
 
 </script>
 
 <template>
   <div>
-    <div class="movie_recommend margin-top-large">
+    <div class="movie_recommend margin-top-large movie_container">
       <a-row>
         <a-col :span="12">
           <a-typography-title :level="4" class=" left-margin-20 select_forbidden">推荐{{ page_variable.recommend_type }}</a-typography-title>
@@ -39,38 +45,13 @@ axios.get()
         height: 10+'%',
       }">
         <!-- todo 使用v-for批量展示图片-->
-        <a-col :span="4">
-          <a-card hoverable style="width: 90%; height: 100%; border-radius: 10px;"
+        <a-col :span="4" v-for="movie in page_variable.recommend_imgs_data" :key="movie.id">
+          <a-card hoverable style="width: 90%; height: 30em; border-radius: 10px;"
                   @click="">
             <template #cover>
-              <img alt="skirt" />
+              <img style="height: 20em" :alt="movie.name" :src="'/resources/'+movie.imgSrc" />
             </template>
-            <a-card-meta title="衬衫"></a-card-meta>
-          </a-card>
-        </a-col>
-        <a-col :span="4">
-          <a-card hoverable style="width: 90%; height: 180px; border-radius: 10px;">
-            <a-card-meta title="衬衫"></a-card-meta>
-          </a-card>
-        </a-col>
-        <a-col :span="4">
-          <a-card hoverable style="width: 90%; height: 180px; border-radius: 10px;">
-            <a-card-meta title="衬衫"></a-card-meta>
-          </a-card>
-        </a-col>
-        <a-col :span="4">
-          <a-card hoverable style="width: 90%; height: 180px; border-radius: 10px;">
-            <a-card-meta title="衬衫"></a-card-meta>
-          </a-card>
-        </a-col>
-        <a-col :span="4">
-          <a-card hoverable style="width: 90%; height: 180px; border-radius: 10px;">
-            <a-card-meta title="衬衫"></a-card-meta>
-          </a-card>
-        </a-col>
-        <a-col :span="4">
-          <a-card hoverable style="width: 90%; height: 180px; border-radius: 10px;">
-            <a-card-meta title="衬衫"></a-card-meta>
+            <a-card-meta :title="movie.name"></a-card-meta>
           </a-card>
         </a-col>
       </a-row>
@@ -79,5 +60,8 @@ axios.get()
 </template>
 
 <style scoped>
-
+.movie_container{
+  width: 80%;
+  margin-left: 10%;
+}
 </style>
