@@ -15,4 +15,15 @@ public interface VideoMapper {
     @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoByName")
     List<VideoEntity> getVideoByName(@Param("name") String name);
 
+    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoEraByType")
+    List<String> getVideoEra(@Param("type") String typeName);
+
+    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoLocationByType")
+    List<String> getVideoLocation();
+
+    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoTypeByType")
+    List<String> getVideoType(@Param("type") String typeName);
+
+    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideosLikeName")
+    List<VideoEntity> getVideoLikeName(@Param("name") String name);
 }

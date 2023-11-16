@@ -208,6 +208,18 @@ div {
     user-select: none;
 }
 
+.cursor_pointer{
+    cursor: pointer;
+}
+
+.cursor_default{
+    cursor: auto
+}
+
+.horizontal_center{
+    text-align: center;
+}
+
 
 
 /* 通过webkit扩展修改滚动条样式仅限于chrome，safari和opera的滚动条 */

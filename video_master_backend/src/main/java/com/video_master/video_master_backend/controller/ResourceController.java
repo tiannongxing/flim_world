@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -25,5 +26,24 @@ public class ResourceController {
         List<VideoEntity> returnVideo = videoServices.getVideoByName(name);
         String json = JackonUtil.ListToJson(returnVideo);
         return json;
+    }
+
+    @GetMapping("/getAllOptionByName")
+    public String getAllOption(@RequestParam String targetType){
+        List<List<String>> lists = new ArrayList<>();
+        List<String> era = videoServices.getEra(targetType);
+        List<String> location = videoServices.getLocation(targetType);
+        List<String> allType = videoServices.getAllType(targetType);
+        lists.add(era);
+        lists.add(location);
+        lists.add(allType);
+        String s = JackonUtil.ListToJson(lists);
+        return s;
+    }
+
+    @GetMapping("/getMoviesLikeName")
+    public String getMoviesLikeName(@RequestParam String movieName){
+
+        return "true";
     }
 }

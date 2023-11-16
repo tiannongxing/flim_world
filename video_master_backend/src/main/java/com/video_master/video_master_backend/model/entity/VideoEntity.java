@@ -21,6 +21,6 @@ public class VideoEntity {
     private String starring;
     private String description;
     private Integer type;
-    private String location;
+    private Integer locationId;
     private Integer finished;
 }

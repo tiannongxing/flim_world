@@ -1,5 +1,6 @@
 <script setup>
-import {onMounted, reactive, ref} from "vue";
+import {markRaw, onMounted, reactive, ref} from "vue";
+import locale from "ant-design-vue/es/locale/zh_CN.js";
 import {
   AppstoreAddOutlined,
   PoweroffOutlined,
@@ -7,6 +8,9 @@ import {
   SisternodeOutlined,
   UserOutlined
 } from "@ant-design/icons-vue";
+import router from "../routers/main.js";
+import LoginPanelByMail from "./loginComp/LoginPanelByMail.vue";
+import LoginPanelByPassword from "./loginComp/LoginPanelByPassword.vue";
 
 onMounted(() => {
   user_display_size.width = avatar.value.size * 9
@@ -25,19 +29,13 @@ const title_img_click = () => {
   console.log('title_img_click')
 }
 
-const handleMenuSelector = (item) => {
-  bind_item.value = item.title
-}
 const change_font_color = (event, color) => {
   event.target.style.color = color
 }
 
-let find = reactive({
-  key_word: 'clothes',
-  find_content: ''
-})
+let find = ref("")
 let onSearch = () => {
-  console.log('search')
+  jumpToPage('/searchedMovie', find.value)
 }
 let avatar_animate = ref('')
 const animate_list = ref(['avatar_magnify', 'avatar_shrink', 'user_display_show', 'user_display_hidden'])
@@ -54,6 +52,31 @@ let display_user_panel = ref('')
 let font_color = ref(font_color_list.unselect)
 let display_sub_user_panel = ref('')
 let selected = ref("index")
+let jumpToPage = (path, ...param) => {
+  let params = "";
+  if (param.length != 0) {
+    params = JSON.stringify(param)
+  }
+  router.push({path: path, query: {params: params}})
+}
+const modelOpen = reactive({
+  loginModel: false,
+  registerModel: false,
+})
+const showModel = (modelName) => {
+  modelOpen[modelName] = true
+}
+const handleOk = (modelName) => {
+  console.log(modelName);
+  modelOpen[modelName] = false
+};
+
+let loginPanelShowList = reactive([
+  markRaw(LoginPanelByPassword),
+  markRaw(LoginPanelByMail),
+])
+
+let selectedLoginPanel = ref(loginPanelShowList[0])
 
 </script>
 
@@ -68,28 +91,28 @@ let selected = ref("index")
       <a-col :span="7" style="margin-left: 3em">
         <a-row class="vertical_center margin-top-tiny">
           <a-col :span="4" class="nav-font-huge">
-            <div class="select_button">
+            <div class="select_button user_select_forbidden" @click="jumpToPage('/index')">
               首页
             </div>
           </a-col>
           <a-col :span="4" class="nav-font-huge">
-            <div class="select_button">
+            <div class="select_button user_select_forbidden" @click="jumpToPage('/movieList','电影')">
               电影
             </div>
           </a-col>
           <a-col :span="4" class="nav-font-huge">
-            <div class="select_button">
+            <div class="select_button user_select_forbidden" @click="jumpToPage('/movieList','动漫')">
               动漫
             </div>
-          </a-col >
+          </a-col>
           <a-col :span="5" class="nav-font-huge">
-            <div class="select_button">
+            <div class="select_button user_select_forbidden" @click="jumpToPage('/movieList','电视剧')">
               电视剧
             </div>
           </a-col>
           <a-col :span="4" class="nav-font-huge">
-            <div class="select_button">
-              儿童
+            <div class="select_button user_select_forbidden" @click="jumpToPage('/movieList','教育')">
+              教育
             </div>
           </a-col>
         </a-row>
@@ -97,7 +120,7 @@ let selected = ref("index")
       <!--搜索框-->
       <a-col :span="7">
         <div class="vertical_center">
-          <a-input v-model="find.find_content">
+          <a-input v-model:value="find" placeholder="请输入影片名">
             <template #suffix>
               <a-button size="middle" type="primary" @click="onSearch">搜索</a-button>
             </template>
@@ -133,11 +156,12 @@ let selected = ref("index")
                     <a-col :span="12"><span>待定内容3</span></a-col>
                     <a-col :span="12"><span>待定内容4</span></a-col>
                   </a-row>
-                  <a-button type="primary" size="large" block @click="login">立即登录</a-button>
+                  <a-button type="primary" size="large" block @click="showModel('loginModel')">立即登录</a-button>
                   <a-row class="align-center nav-font-middle" style="margin: 5% 0">
                     <a-col :span="24">
                       <span class="select_forbidden">首次使用？</span>
-                      <span style="color: #4096FF" @click="register">点击注册</span>
+                      <span style="color: #4096FF" @click="showModel('registerModel')"
+                            class="user_select_forbidden cursor_pointer">点击注册</span>
                     </a-col>
                   </a-row>
                 </div>
@@ -277,9 +301,30 @@ let selected = ref("index")
         </a-row>
       </a-col>
       <a-col :span="3" style="transform:translateY(25%)">
-          <a-typography-text class="backend nav-font-huge user_select_forbidden" onclick="alert('进入后台')">后台</a-typography-text>
+        <a-typography-text class="backend nav-font-huge user_select_forbidden" onclick="alert('进入后台')">后台
+        </a-typography-text>
       </a-col>
     </a-row>
+    <a-config-provider :locale="locale"> <!-- 语言设置 -->
+      <!-- 登录模态窗口 后端返回数据后再判断窗口是否需要退出 -->
+      <a-modal v-model:open="modelOpen.loginModel" title="登录" ok-text="登录" @ok="handleOk('loginModel')">
+        <div class="align-center">
+          <a-button type="link" :disabled="selectedLoginPanel === loginPanelShowList[0]"
+                    @click="selectedLoginPanel=loginPanelShowList[0]">密码登录</a-button>
+          <a-typography-text>|</a-typography-text>
+          <a-button type="link" :disabled="selectedLoginPanel === loginPanelShowList[1]"
+                    @click="selectedLoginPanel=loginPanelShowList[1]">邮箱登录</a-button>
+        </div>
+        <component :is="selectedLoginPanel"></component>
+      </a-modal>
+
+      <!-- 注册模态窗口 -->
+      <a-modal v-model:open="modelOpen.registerModel" title="注册" ok-text="注册" @ok="handleOk('registerModel')">
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+      </a-modal>
+    </a-config-provider>
   </div>
 
 </template>
@@ -371,20 +416,21 @@ let selected = ref("index")
   color: #B3B3B3;
 }
 
-.select_button:hover{
+.select_button:hover {
   color: white;
   border-bottom: 3px solid #5FB878;
 }
-vertical_align_center{
+
+vertical_align_center {
   height: calc(100%);
   line-height: calc(100%);
 }
 
-.backend{
+.backend {
   color: #B3B3B3;
 }
 
-.backend:hover{
+.backend:hover {
   color: white;
 }
 
