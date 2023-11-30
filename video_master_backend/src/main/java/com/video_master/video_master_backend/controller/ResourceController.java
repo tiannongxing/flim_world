@@ -1,7 +1,9 @@
 package com.video_master.video_master_backend.controller;
 
+import com.video_master.video_master_backend.model.dto.VideoDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.services.VideoServices;
+import com.video_master.video_master_backend.model.vo.VideoVo;
 import com.video_master.video_master_backend.util.JackonUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +22,7 @@ import java.util.List;
 public class ResourceController {
     @Resource
     private VideoServices videoServices;
-   
+
     @GetMapping("/getByName")
     public String getVideoData(@RequestParam String name) {
         List<VideoEntity> returnVideo = videoServices.getVideoByName(name);
@@ -29,7 +31,7 @@ public class ResourceController {
     }
 
     @GetMapping("/getAllOptionByName")
-    public String getAllOption(@RequestParam String targetType){
+    public String getAllOption(@RequestParam String targetType) {
         List<List<String>> lists = new ArrayList<>();
         List<String> era = videoServices.getEra(targetType);
         List<String> location = videoServices.getLocation(targetType);
@@ -42,8 +44,17 @@ public class ResourceController {
     }
 
     @GetMapping("/getMoviesLikeName")
-    public String getMoviesLikeName(@RequestParam String movieName){
+    public String getMoviesLikeName(@RequestParam String movieName) {
 
         return "true";
     }
+
+    @GetMapping("/getMovieDetailById")
+    public String getMovieDetailById(@RequestParam Integer mid) {
+        // 通过id查找影片信息，返回影片的json格式字符串
+        VideoVo videoVo = VideoDTO.DTOToVo(VideoDTO.entityToDTO(videoServices.getVideoById(mid)));
+        String res = JackonUtil.ObjectToJSON(videoVo);
+        return res;
+    }
+
 }

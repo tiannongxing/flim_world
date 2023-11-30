@@ -15,4 +15,13 @@ public interface VideoServices {
     List<String> getAllType(String type);
 
     List<VideoEntity> getVideoLikeName(String Name);
+
+    VideoEntity getVideoById(Integer id);
+
+    String videoLocation (Integer id);
+
+    List<String> videoCategory (Integer id);
+
+    String videoType(Integer typeId);
+
 }

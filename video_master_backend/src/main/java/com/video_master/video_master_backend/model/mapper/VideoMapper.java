@@ -2,28 +2,64 @@ package com.video_master.video_master_backend.model.mapper;
 
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.util.DynaSQLProviderBuilder;
-import jakarta.annotation.Resource;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.mapping.StatementType;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 @Mapper
 @Repository
 public interface VideoMapper {
-    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoByName")
+    @SelectProvider(type = DynaSQLProviderBuilder.class, method = "selectVideoByName")
     List<VideoEntity> getVideoByName(@Param("name") String name);
 
-    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoEraByType")
+    @SelectProvider(type = DynaSQLProviderBuilder.class, method = "selectVideoEraByType")
     List<String> getVideoEra(@Param("type") String typeName);
 
-    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoLocationByType")
+    @SelectProvider(type = DynaSQLProviderBuilder.class, method = "selectVideoLocationByType")
     List<String> getVideoLocation();
 
-    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideoTypeByType")
+    @SelectProvider(type = DynaSQLProviderBuilder.class, method = "selectVideoTypeByType")
     List<String> getVideoType(@Param("type") String typeName);
 
-    @SelectProvider(type= DynaSQLProviderBuilder.class,method = "selectVideosLikeName")
+    @SelectProvider(type = DynaSQLProviderBuilder.class, method = "selectVideosLikeName")
     List<VideoEntity> getVideoLikeName(@Param("name") String name);
+
+    // 由于数据库设计的问题，实际上这里获得的type是视频的category,使用的是视频的id非type的id值
+    @Select("""
+            SELECT
+            	category_name
+            FROM
+            	videos
+            	LEFT JOIN video_category ON videos.id = video_category.video_id
+            	LEFT JOIN category ON video_category.category_id = category.id
+            WHERE
+            	videos.id = #{id}
+            """)
+    List<String> getVideoTypeById(@Param("id") int id);
+
+    @Select("""
+            SELECT
+            	location_name
+            FROM
+            	 video_location
+            WHERE
+            	location_id = #{id}
+            """)
+    String getVideoLocationById(@Param("id") int id);
+
+    @Select("""
+            SELECT
+            	category_name
+            FROM
+            	category
+            WHERE
+            	id = #{id}
+            """)
+    String getVideoTrueTypeById(@Param("id") int typeId);
+
+    //使用存储过程方式 只需调用存储过程和传入参数
+    @Select("CALL query_video_by_id(#{rowId})")
+    VideoEntity getVideoById(@Param("rowId") int rowId);
 }

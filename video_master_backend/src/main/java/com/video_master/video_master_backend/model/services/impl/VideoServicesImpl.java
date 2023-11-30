@@ -36,6 +36,26 @@ public class VideoServicesImpl implements VideoServices {
     public List<VideoEntity> getVideoLikeName(String name) {
         return videoMapper.getVideoLikeName(name);
     }
+
+    @Override
+    public VideoEntity getVideoById(Integer id) {
+        return videoMapper.getVideoById(id);
+    }
+
+    @Override
+    public String videoLocation(Integer id) {
+        return videoMapper.getVideoLocationById(id);
+    }
+
+    @Override
+    public List<String> videoCategory(Integer id) {
+        return videoMapper.getVideoTypeById(id);
+    }
+
+    @Override
+    public String videoType(Integer typeId) {
+        return videoMapper.getVideoTrueTypeById(typeId);
+    }
 }
 
 

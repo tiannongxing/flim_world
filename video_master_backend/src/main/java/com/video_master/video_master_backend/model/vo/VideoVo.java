@@ -1,18 +1,17 @@
-package com.video_master.video_master_backend.model.entity;
+package com.video_master.video_master_backend.model.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-import javax.management.Descriptor;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VideoEntity {
+public class VideoVo {
     private Integer id;
     private String name;
     private Integer currentEpisode;
@@ -20,8 +19,9 @@ public class VideoEntity {
     private String imgSrc;
     private String starring;
     private String description;
-    private Integer type;
-    private Integer locationId;
+    private String type;
+    private List<String> category;
+    private String location;
     private String publishDate;
-    private Integer finished;
+    private String finished;
 }

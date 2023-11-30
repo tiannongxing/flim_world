@@ -18,7 +18,7 @@ public class JackonUtil {
         }
     }
 
-    public static String getJSON(Object object){
+    public static String ObjectToJSON(Object object){
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
@@ -26,7 +26,7 @@ public class JackonUtil {
         }
     }
 
-    public static <T> T getObject(String json,Class<T> clazz){
+    public static <T> T JsonToObject(String json,Class<T> clazz){
         try {
             return objectMapper.readValue(json,clazz);
         } catch (JsonProcessingException e) {
@@ -41,4 +41,5 @@ public class JackonUtil {
            throw new RuntimeException(e);
        }
    }
+
 }
