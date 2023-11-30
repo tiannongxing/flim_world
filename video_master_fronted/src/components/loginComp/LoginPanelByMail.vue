@@ -11,6 +11,7 @@ let loginDataSet = reactive({
     code: "",
   },
 })
+
 let isLoading = ref(false)
 let CaptchaContent = ref('验证码')
 let disableSendButton = ref(false)
@@ -38,6 +39,9 @@ let sendCheckCode = (mail) => {
     // todo 发往错误提示页面
   })
 }
+
+
+//todo 尝试：当emitter调用该模块时使用回调函数返回该模块中填写的数据。
 </script>
 
 <template>

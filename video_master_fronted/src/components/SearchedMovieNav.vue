@@ -44,7 +44,7 @@ const oprItem = ref([
   },
 ])
 const callPanel = ()=>{
-  console.log(activeKey.value[0] + '/' + oprActiveKey.value[0cd])
+  console.log(activeKey.value[0] + '/' + oprActiveKey.value[0])
 }
 </script>
 

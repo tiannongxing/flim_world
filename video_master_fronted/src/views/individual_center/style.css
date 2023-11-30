@@ -1,0 +1,25 @@
+.small_tip{
+    display: inline-block;
+    height: 1em;
+    width: 4px;
+    border-radius: 2px;
+    background: #02A7F0;
+}
+
+.small_tip_font_color {
+    margin-left: 1em;
+    color: #02A7F0;
+    font-size: 16px;
+}
+
+.horizontal_center{
+    text-align: center;
+}
+
+.container{
+    padding: 2em;
+}
+
+.inline_block{
+    display: inline-block;
+}

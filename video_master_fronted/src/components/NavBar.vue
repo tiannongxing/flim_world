@@ -11,6 +11,7 @@ import {
 import router from "../routers/main.js";
 import LoginPanelByMail from "./loginComp/LoginPanelByMail.vue";
 import LoginPanelByPassword from "./loginComp/LoginPanelByPassword.vue";
+import RegisterComp from "./RegisterComp.vue";
 
 onMounted(() => {
   user_display_size.width = avatar.value.size * 9
@@ -40,14 +41,8 @@ let onSearch = () => {
 let avatar_animate = ref('')
 const animate_list = ref(['avatar_magnify', 'avatar_shrink', 'user_display_show', 'user_display_hidden'])
 let header_image = ref('/static/unlogin.png')
-let is_login = ref(false)
+let is_login = ref(true)
 let show_user_display = ref(false)
-let login = () => {
-  alert('login')
-}
-let register = () => {
-  alert('register')
-}
 let display_user_panel = ref('')
 let font_color = ref(font_color_list.unselect)
 let display_sub_user_panel = ref('')
@@ -68,8 +63,12 @@ const showModel = (modelName) => {
 }
 const handleOk = (modelName) => {
   console.log(modelName);
-  modelOpen[modelName] = false
+  if (1==1)
+    modelOpen[modelName] = false
+  // 输入的信息有误，不退出注册页面，弹出报错信息
 };
+
+
 
 let loginPanelShowList = reactive([
   markRaw(LoginPanelByPassword),
@@ -77,7 +76,13 @@ let loginPanelShowList = reactive([
 ])
 
 let selectedLoginPanel = ref(loginPanelShowList[0])
+let jumpToAdmin = ()=>{
+  window.location.href = 'src/views/administrator/'
+}
 
+let jumpToIndividualCenter = ()=>{
+  window.location.href = 'src/views/individual_center/'
+}
 </script>
 
 <template>
@@ -174,108 +179,18 @@ let selectedLoginPanel = ref(loginPanelShowList[0])
                    :style="
                {
                 'width':user_display_size.width+'px',
-                'height':user_display_size.height+'px',
-                'left':-user_display_size.width/4+'px',
+                'height':user_display_size.height/1.8+'px',
+                'left':-user_display_size.width/7.5+'px',
                 'margin-top':25+'%'
                 }">
                 <div class="content" style="padding-top: 10%">
                   <a-divider/>
-                  <a-row class="align-center">
-                    <!--todo 填入关注/粉丝/动态的数目 改造成v-for形式-->
-                    <a-col :span="8" class="cursor_pointer">
-                      <div
-                          @mouseenter="change_font_color($event,font_color_list.selected)"
-                          @mouseleave="change_font_color($event,font_color_list.unselect)"
-                          @click=""
-                          :style="{
-                               color: font_color,
-                             }"
-                      >
-                        <p class="select_forbidden">35</p>
-                        <p class="select_forbidden">关注</p>
-                      </div>
-
-                    </a-col>
-                    <a-col :span="8" class="cursor_pointer">
-                      <div
-                          @mouseenter="change_font_color($event,font_color_list.selected)"
-                          @mouseleave="change_font_color($event,font_color_list.unselect)"
-                          @click=""
-                          :style="{
-                               color: font_color,
-                             }"
-                      >
-                        <p>127</p>
-                        <p>粉丝</p>
-                      </div>
-                    </a-col>
-                    <a-col :span="8" class="cursor_pointer">
-                      <div
-                          @mouseenter="change_font_color($event,font_color_list.selected)"
-                          @mouseleave="change_font_color($event,font_color_list.unselect)"
-                          @click=""
-                          :style="{
-                               color: font_color,
-                             }"
-                      >
-                        <p>523</p>
-                        <p>动态</p>
-                      </div>
-                    </a-col>
-                  </a-row>
                   <a-button @mouseenter=""
                             @mouseleave=""
-                            class="align-left" type="text" size="large" block>
-                    <span><UserOutlined/> 个人中心</span>
+                            class="align-left" type="text" size="large" @click="jumpToIndividualCenter" block>
+                    <span><UserOutlined/>个人中心</span>
 
                   </a-button>
-                  <a-button @mouseenter=""
-                            @mouseleave=""
-                            class="align-left" type="text" size="large" block>
-                    <span><AppstoreAddOutlined/> 商品管理</span>
-                  </a-button>
-                  <a-button @mouseenter="display_sub_user_panel=animate_list[2]"
-                            @mouseleave="display_sub_user_panel=animate_list[3]"
-                            class="align-left" type="text" size="large" block>
-                              <span>
-                                <SisternodeOutlined/>
-                                更多服务
-                                <span :style="{
-                                 'margin-left': 80+'%',
-                                }"><RightOutlined/></span>
-                              </span>
-                    <div class="user_display"
-                         :class="display_sub_user_panel"
-                         :style="{
-                                'width': 100 + '%',
-                                'height': 380 + '%',
-                                'top':0,
-                                'left':90+'%',
-                           }">
-                      <div :style="{margin:10+'px'}">
-                        <a-button @mouseenter=""
-                                  @mouseleave=""
-                                  class="align-left" type="text" size="large" block>
-                          <span><UserOutlined/> 快递查询</span>
-                        </a-button>
-                        <br>
-                        <a-button @mouseenter=""
-                                  @mouseleave=""
-                                  class="align-left" type="text" size="large" block>
-                          <span><UserOutlined/> 订单中心</span>
-
-                        </a-button>
-                        <br>
-                        <a-button @mouseenter=""
-                                  @mouseleave=""
-                                  class="align-left" type="text" size="large" block>
-                          <span><UserOutlined/> 还没想好</span>
-
-                        </a-button>
-                      </div>
-                    </div>
-                  </a-button>
-                  <a-divider/>
                   <a-button @mouseenter=""
                             @mouseleave=""
                             class="align-left" type="text" size="large" block>
@@ -301,7 +216,7 @@ let selectedLoginPanel = ref(loginPanelShowList[0])
         </a-row>
       </a-col>
       <a-col :span="3" style="transform:translateY(25%)">
-        <a-typography-text class="backend nav-font-huge user_select_forbidden" onclick="alert('进入后台')">后台
+        <a-typography-text class="backend nav-font-huge user_select_forbidden" @click="jumpToAdmin">后台
         </a-typography-text>
       </a-col>
     </a-row>
@@ -320,9 +235,7 @@ let selectedLoginPanel = ref(loginPanelShowList[0])
 
       <!-- 注册模态窗口 -->
       <a-modal v-model:open="modelOpen.registerModel" title="注册" ok-text="注册" @ok="handleOk('registerModel')">
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
+        <register-comp></register-comp>
       </a-modal>
     </a-config-provider>
   </div>
@@ -433,5 +346,7 @@ vertical_align_center {
 .backend:hover {
   color: white;
 }
+
+
 
 </style>
