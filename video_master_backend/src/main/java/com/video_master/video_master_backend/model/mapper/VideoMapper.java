@@ -7,6 +7,7 @@ import org.apache.ibatis.mapping.StatementType;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 @Repository
@@ -59,7 +60,13 @@ public interface VideoMapper {
             """)
     String getVideoTrueTypeById(@Param("id") int typeId);
 
+//    @SelectProvider(type=DynaSQLProviderBuilder.class,method = "selectVideos")
+//    List<VideoEntity> getVideos(Map<String,String> params);
+
     //使用存储过程方式 只需调用存储过程和传入参数
     @Select("CALL query_video_by_id(#{rowId})")
     VideoEntity getVideoById(@Param("rowId") int rowId);
+
+    // 对于实在没有办法使用注解处理的使用原始的xml来进行开发
+    List<VideoEntity> getVideos(Map<String,String> params);
 }

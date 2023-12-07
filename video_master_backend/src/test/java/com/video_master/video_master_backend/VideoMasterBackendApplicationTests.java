@@ -7,11 +7,15 @@ import com.video_master.video_master_backend.model.services.VideoServices;
 
 import com.video_master.video_master_backend.model.vo.VideoVo;
 import com.video_master.video_master_backend.util.DynaSQLProviderBuilder;
+import com.video_master.video_master_backend.util.VideosAttributes;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest
 @Slf4j
@@ -32,5 +36,15 @@ class VideoMasterBackendApplicationTests {
         VideoDTO videoDTO = VideoDTO.entityToDTO(videoById);
         VideoVo videoVo = VideoDTO.DTOToVo(videoDTO);
         log.info(videoVo.toString());
+    }
+
+    @Test
+    void SQLTest() {
+        Map<String,String> map = new HashMap<String, String>();
+        map.put(VideosAttributes.VIDEOS_TYPE,"电影");
+
+        DynaSQLProviderBuilder dynaSQLProviderBuilder = new DynaSQLProviderBuilder();
+//        String s = dynaSQLProviderBuilder.selectVideos("movie");
+//        log.info(s);
     }
 }

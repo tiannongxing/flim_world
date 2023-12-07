@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.video_master.video_master_backend.model.mapper.VideoMapper">
+
+    <!-- 使用map作为参数输入的动态sql语句  -->
+    <select id="getVideos" parameterType="map" resultType="VideoEntity">
+        SELECT * FROM videos
+        <where>
+            <if test="movieType != null">
+                AND type = ( SELECT id FROM category WHERE category_name = #{movieType} )
+            </if>
+            <if test="movieSubType != null">
+                AND id IN ( SELECT video_category.video_id FROM video_category LEFT JOIN category ON category.id = video_category.category_id WHERE category.category_name = #{movieSubType} )
+            </if>
+            <if test="movieRegion != null">
+                AND location_id = ( SELECT video_location.location_id FROM video_location WHERE location_name = #{movieRegion} )
+            </if>
+            <if test="movieAging != null">
+                AND publish_date = #{movieAging}
+            </if>
+        </where>
+        LIMIT 30
+        <if test="targetOffset != null">
+            OFFSET #{targetOffset}
+        </if>
+    </select>
+
+</mapper>

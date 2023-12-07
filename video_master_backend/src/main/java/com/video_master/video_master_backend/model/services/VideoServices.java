@@ -3,6 +3,7 @@ package com.video_master.video_master_backend.model.services;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface VideoServices {
 
@@ -23,5 +24,7 @@ public interface VideoServices {
     List<String> videoCategory (Integer id);
 
     String videoType(Integer typeId);
+
+    List<VideoEntity> getVideos(Map<String,String> params);
 
 }

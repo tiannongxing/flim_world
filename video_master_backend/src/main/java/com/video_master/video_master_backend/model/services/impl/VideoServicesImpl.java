@@ -3,11 +3,14 @@ package com.video_master.video_master_backend.model.services.impl;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.mapper.VideoMapper;
 import com.video_master.video_master_backend.model.services.VideoServices;
+import com.video_master.video_master_backend.util.VideosAttributes;
 import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+
 @Service
 public class VideoServicesImpl implements VideoServices {
     @Resource
@@ -55,6 +58,17 @@ public class VideoServicesImpl implements VideoServices {
     @Override
     public String videoType(Integer typeId) {
         return videoMapper.getVideoTrueTypeById(typeId);
+    }
+
+    @Override
+    public List<VideoEntity> getVideos(Map<String,String> params) {
+        // 根据参数的个数和类型动态搜索
+        if(params.get(VideosAttributes.TARGET_PAGE) != null) {
+            int offset = (Integer.parseInt(params.get("TARGET_PAGE")) - 1) * 30;
+            params.put(VideosAttributes.TARGET_OFFSET, Integer.toString(offset));
+        }
+        List<VideoEntity> videos = videoMapper.getVideos(params);
+        return videos;
     }
 }
 

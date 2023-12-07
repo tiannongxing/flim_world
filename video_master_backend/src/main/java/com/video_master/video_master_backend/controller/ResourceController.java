@@ -5,6 +5,7 @@ import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.services.VideoServices;
 import com.video_master.video_master_backend.model.vo.VideoVo;
 import com.video_master.video_master_backend.util.JackonUtil;
+import com.video_master.video_master_backend.util.VideosAttributes;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -55,6 +57,14 @@ public class ResourceController {
         VideoVo videoVo = VideoDTO.DTOToVo(VideoDTO.entityToDTO(videoServices.getVideoById(mid)));
         String res = JackonUtil.ObjectToJSON(videoVo);
         return res;
+    }
+
+    @GetMapping("/getVideos")
+    public String getVideos(@RequestParam Map<String,String> params){
+        // 直接传入params，根据params里的key 做筛选
+        List<VideoEntity> videos = videoServices.getVideos(params);
+        String returnJson = JackonUtil.ListToJson(videos);
+        return returnJson;
     }
 
 }
