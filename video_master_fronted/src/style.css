@@ -204,6 +204,10 @@ div {
     height: 100%;
 }
 
+.container_extend{
+    padding: 2em;
+    margin-top: 1em;
+}
 .user_select_forbidden{
     user-select: none;
 }

@@ -1,4 +1,6 @@
 <script setup>
+import router from "../routers/main.js";
+
 const targetType = defineProps({
   target_type : String,
 })
@@ -6,7 +8,7 @@ const targetType = defineProps({
 console.log(targetType.target_type)
 
 let movieDetail = (movieMsg) => {
-  console.log(movieMsg)
+  router.push({path:'/movieDetail',query:{movieIndex:movieMsg}})
 }
 </script>
 
