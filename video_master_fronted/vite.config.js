@@ -36,6 +36,13 @@ export default defineConfig({
                 target: "http://192.168.32.137/users",
                 changeOrigin: true,
                 rewrite: path => path.replace(/^\/users/, '')
+            },
+            //websocket连接
+            '/ws': {
+                target: 'ws://localhost:8089', // 后端服务的地址
+                changeOrigin: true,
+                ws: true, // 开启 WebSocket 代理
+                rewrite: (path) => path.replace(/^\/ws/, '')
             }
         }
     },

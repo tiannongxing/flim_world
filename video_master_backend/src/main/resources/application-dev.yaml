@@ -17,3 +17,5 @@ server:
   port: 8089
   servlet:
     context-path: "/video-master"
+    encoding:
+      charset: UTF-8

@@ -11,3 +11,4 @@ mybatis:
 
   mapper-locations: classpath:/mapper/*.xml
   type-aliases-package: com.video_master.video_master_backend.model.entity
+
