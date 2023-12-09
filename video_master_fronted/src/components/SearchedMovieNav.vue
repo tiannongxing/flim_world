@@ -2,49 +2,54 @@
 import {nextTick, ref} from "vue";
 import mitt from "mitt";
 import emitter from "../utils/EventBus.js";
+import {VideosAttributes} from "../utils/VideosAttributes.js";
 
-const activeKey = ref(['all'])
-const oprActiveKey = ref(['default'])
+const activeKey = ref([''])
+const oprActiveKey = ref([''])
 const typeItem = ref([
   {
-    key: 'all',
+    key: '',
     label: '全部',
     title: '全部',
   }, {
-    key: 'film',
+    key: '电影',
     label: '电影',
     title: '电影',
   }, {
-    key: 'comic',
+    key: '动漫',
     label: '动漫',
     title: '动漫',
   }, {
-    key: 'drama',
+    key: '电视剧',
     label: '电视剧',
     title: '电视剧',
   }, {
-    key: 'education',
+    key: '教育',
     label: '教育',
     title: '教育',
   },
 ])
 const oprItem = ref([
   {
-    key: 'default',
+    key: '',
     label: '默认排序',
     title: '默认排序',
   }, {
-    key: 'play_num',
+    key: VideosAttributes.MOST_PLAYS_NUMBER,
     label: '最多播放',
     title: '最多播放',
   }, {
-    key: 'new',
+    key: VideosAttributes.LEAST_PUBLISH_DATE,
     label: '最新发布',
     title: '最新发布',
   },
 ])
 const callPanel = ()=>{
-  console.log(activeKey.value[0] + '/' + oprActiveKey.value[0])
+  let types = {
+    type: activeKey.value[0],
+    opr: oprActiveKey.value[0]
+  }
+  emitter.emit("currentSelectCondition", types)
 }
 </script>
 

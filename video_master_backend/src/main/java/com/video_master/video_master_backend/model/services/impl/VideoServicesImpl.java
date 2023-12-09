@@ -1,10 +1,12 @@
 package com.video_master.video_master_backend.model.services.impl;
 
+import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.mapper.VideoMapper;
 import com.video_master.video_master_backend.model.services.VideoServices;
 import com.video_master.video_master_backend.util.VideosAttributes;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class VideoServicesImpl implements VideoServices {
     @Resource
     private VideoMapper videoMapper;
@@ -64,12 +67,29 @@ public class VideoServicesImpl implements VideoServices {
     public List<VideoEntity> getVideos(Map<String,String> params) {
         // 根据参数的个数和类型动态搜索
         if(params.get(VideosAttributes.TARGET_PAGE) != null) {
-            int offset = (Integer.parseInt(params.get("TARGET_PAGE")) - 1) * 30;
-            params.put(VideosAttributes.TARGET_OFFSET, Integer.toString(offset));
+            int offset = (Integer.parseInt(params.get(VideosAttributes.TARGET_PAGE)) - 1) * 30;
+            params.put(VideosAttributes.TARGET_OFFSET, String.valueOf(offset));
         }
         List<VideoEntity> videos = videoMapper.getVideos(params);
         return videos;
     }
+
+    @Override
+    public Integer getAllVideosByParams(Map<String, String> params) {
+        return videoMapper.getAllVideosByParams(params);
+    }
+
+    @Override
+    public List<VideoSearchedDTO> getSearchedVideoLikeName(Map<String, String> params) {
+        return videoMapper.getSearchedVideoLikeName(params);
+    }
+
+    @Override
+    public Integer getAllVideosLikeName(Map<String, String> params) {
+        return videoMapper.getAllVideosLikeName(params);
+    }
+
+
 }
 
 

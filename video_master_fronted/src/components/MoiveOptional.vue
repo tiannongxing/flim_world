@@ -1,12 +1,13 @@
 <script setup>
-import {onBeforeMount, onBeforeUpdate, reactive, ref} from "vue";
+import {onBeforeMount, onBeforeUpdate, reactive, ref, watch} from "vue";
 import axios from "axios";
+import emitter from "../utils/EventBus.js";
 
 let selectCondition = reactive({
   // 通过这些条件查询对应的影片
-  type:"全部",
-  region:"全部",
-  era:"全部",
+  type:"",
+  region:"",
+  era:"",
 })
 
 const targetType = defineProps({
@@ -33,24 +34,31 @@ onBeforeMount(()=>{
         ).catch()
 })
 
+watch( selectCondition,
+    (pre,next)=>{
+      emitter.emit("currentSelectCondition",next)
+    })
 </script>
 
 <template>
   <div class="optional_container margin-top-giant">
     <div class="optional_sub_container">
       <div class="nav-font-huge vertical_center choice_unit user_select_forbidden">类型：</div>
-      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" onclick="alert('12341234')">全部</div>
-      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" v-for="type in dataSet.dataType">{{ type }}</div>
+      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" @click='selectCondition.type=""'>全部</div>
+      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" @click="selectCondition.type=type"
+           v-for="type in dataSet.dataType">{{ type }}</div>
     </div>
     <div class="optional_sub_container">
       <div class="nav-font-huge vertical_center choice_unit user_select_forbidden ">地区：</div>
-      <div class="nav-font-big vertical_center choice_unit user_select_forbidden">全部</div>
-      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" v-for="region in dataSet.dataRegion">{{ region }}</div>
+      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" @click='selectCondition.region=""'>全部</div>
+      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" @click="selectCondition.region=region"
+           v-for="region in dataSet.dataRegion">{{ region }}</div>
     </div>
     <div class="optional_sub_container">
       <div class="nav-font-huge vertical_center choice_unit user_select_forbidden">年代：</div>
-      <div class="nav-font-big vertical_center choice_unit user_select_forbidden">全部</div>
-      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" v-for="era in dataSet.dataEra">{{ era }}</div>
+      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" @click='selectCondition.era=""'>全部</div>
+      <div class="nav-font-big vertical_center choice_unit user_select_forbidden" @click="selectCondition.era=era"
+           v-for="era in dataSet.dataEra">{{ era }}</div>
     </div>
   </div>
 </template>

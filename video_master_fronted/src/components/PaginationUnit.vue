@@ -1,17 +1,29 @@
 <script setup>
-import { ref } from 'vue';
+import {reactive, ref, watch,defineEmits} from 'vue';
 import locale from "ant-design-vue/es/locale/zh_CN.js";
-const current1 = ref(1);
-const current2 = ref(2);
+let current_pagination = ref(1)
+let total = ref(300)
 const onChange = pageNumber => {
   console.log('Page: ', pageNumber);
 };
+const emit = defineEmits(['pagination-change'])
+watch(current_pagination, (pre, next) => {
+  emit('pagination-change',pre)
+})
+
+let receivedParams = defineProps({
+  total: Number
+})
+total.value = receivedParams.total
+watch(()=> receivedParams.total, (pre, next) => {
+  total.value=pre;
+})
 </script>
 
 <template>
-  <div class="align-center margin-top-giant">
+  <div class="align-center margin-top-giant" >
     <a-config-provider :locale="locale">
-      <a-pagination v-model:current="current1" simple :total="300" default-page-size="30"/>
+      <a-pagination v-model:current="current_pagination" show-quick-jumper :showSizeChanger="false" :total="total" default-page-size="30"/>
     </a-config-provider>
   </div>
 </template>

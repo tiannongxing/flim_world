@@ -9,6 +9,7 @@ public class VideosAttributes {
     public static final String TARGET_PAGE = "targetPage";
     public static final String TARGET_OFFSET = "targetOffset";
     public static final String SEARCHED_KEY_WORDS = "searchedKeyWords";
-    public static final String SEARCHED_ORDER = "searchedOrder";
+    public static final String MOST_PLAYS_NUMBER = "mostPlaysNumber";
+    public static final String LEAST_PUBLISH_DATE = "leastPublishDate";
 
 }

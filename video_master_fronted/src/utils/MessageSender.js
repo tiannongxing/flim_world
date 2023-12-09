@@ -10,10 +10,12 @@ const getMessageSender = function(path, ...msgs) {
            if(i>0) {
                generatedMsgs += '&'
            }
-           generatedMsgs += `${msgs[i].queryTitle}=${msgs[i].queryBody.value}`
+           generatedMsgs += `${msgs[i].queryTitle}=${msgs[i].queryBody}`
        }
 
     }
+
+    console.log(`${path}?${generatedMsgs}`)
     // 返回一个promise对象,在调用的使用使用then或者await来获取数据
     return axios.get(`${path}?${generatedMsgs}`)
 }

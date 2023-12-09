@@ -1,6 +1,9 @@
 package com.video_master.video_master_backend.controller;
 
 import com.video_master.video_master_backend.model.dto.VideoDTO;
+import com.video_master.video_master_backend.model.dto.VideoListsDTO;
+import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
+import com.video_master.video_master_backend.model.dto.VideoSearchedListDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.services.VideoServices;
 import com.video_master.video_master_backend.model.vo.VideoVo;
@@ -45,11 +48,7 @@ public class ResourceController {
         return s;
     }
 
-    @GetMapping("/getMoviesLikeName")
-    public String getMoviesLikeName(@RequestParam String movieName) {
 
-        return "true";
-    }
 
     @GetMapping("/getMovieDetailById")
     public String getMovieDetailById(@RequestParam Integer mid) {
@@ -63,7 +62,29 @@ public class ResourceController {
     public String getVideos(@RequestParam Map<String,String> params){
         // 直接传入params，根据params里的key 做筛选
         List<VideoEntity> videos = videoServices.getVideos(params);
-        String returnJson = JackonUtil.ListToJson(videos);
+
+        VideoListsDTO videoListsDTO = VideoListsDTO.builder()
+                .videoList(videos)
+                .total(videoServices.getAllVideosByParams(params))
+                .build();
+        String returnJson = JackonUtil.ObjectToJSON(videoListsDTO);
+        log.info(returnJson);
+        return returnJson;
+    }
+
+    @GetMapping("/getMoviesLikeName")
+    public String getMoviesLikeName(@RequestParam Map<String,String> params) {
+        log.info("""
+                得到的参数是：-------------------------------------------------》
+                """ +
+                params.toString());
+        List<VideoSearchedDTO> searchedVideoLikeName = videoServices.getSearchedVideoLikeName(params);
+        VideoSearchedListDTO videoSearchedListDTO = VideoSearchedListDTO.builder()
+                .videoList(searchedVideoLikeName)
+                .total(videoServices.getAllVideosLikeName(params))
+                .build();
+
+        String returnJson = JackonUtil.ObjectToJSON(videoSearchedListDTO);
         return returnJson;
     }
 

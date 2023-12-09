@@ -1,5 +1,6 @@
 package com.video_master.video_master_backend.model.mapper;
 
+import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.util.DynaSQLProviderBuilder;
 import org.apache.ibatis.annotations.*;
@@ -69,4 +70,10 @@ public interface VideoMapper {
 
     // 对于实在没有办法使用注解处理的使用原始的xml来进行开发
     List<VideoEntity> getVideos(Map<String,String> params);
+
+    Integer getAllVideosByParams(Map<String,String> params);
+
+    List<VideoSearchedDTO> getSearchedVideoLikeName(Map<String,String> params);
+
+    Integer getAllVideosLikeName(Map<String,String> params);
 }

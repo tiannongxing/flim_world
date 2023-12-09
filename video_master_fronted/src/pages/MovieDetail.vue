@@ -61,7 +61,7 @@ const toPlayer = (clickEpisode) => {
         </a-col>
         <a-col :span="4">
           <!-- 会先找不到一次。目前的问题 -->
-          <img :src="'/resources/'+displayMovieDetail.imgSrc" :alt="displayMovieDetail.imgSrc">
+          <img style="max-height: 30em" :src="'/resources/'+displayMovieDetail.imgSrc" :alt="displayMovieDetail.imgSrc">
         </a-col>
       </a-row>
     </div>

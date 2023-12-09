@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.video_master.video_master_backend.model.mapper.VideoMapper">
-
     <!-- 使用map作为参数输入的动态sql语句  -->
     <select id="getVideos" parameterType="map" resultType="VideoEntity">
         SELECT * FROM videos
@@ -9,20 +8,85 @@
             <if test="movieType != null">
                 AND type = ( SELECT id FROM category WHERE category_name = #{movieType} )
             </if>
-            <if test="movieSubType != null">
-                AND id IN ( SELECT video_category.video_id FROM video_category LEFT JOIN category ON category.id = video_category.category_id WHERE category.category_name = #{movieSubType} )
+            <if test="movieSubType != null and !movieSubType.isEmpty()">
+                AND id IN ( SELECT video_category.video_id FROM video_category LEFT JOIN category ON category.id =
+                video_category.category_id WHERE category.category_name = #{movieSubType} )
             </if>
-            <if test="movieRegion != null">
-                AND location_id = ( SELECT video_location.location_id FROM video_location WHERE location_name = #{movieRegion} )
+            <if test="movieRegion != null and !movieRegion.isEmpty()">
+                AND location_id = ( SELECT video_location.location_id FROM video_location WHERE location_name =
+                #{movieRegion} )
             </if>
-            <if test="movieAging != null">
+            <if test="movieAging != null and !movieAging.isEmpty()">
                 AND publish_date = #{movieAging}
             </if>
         </where>
         LIMIT 30
         <if test="targetOffset != null">
-            OFFSET #{targetOffset}
+            OFFSET
+            #{targetOffset, jdbcType=INTEGER,typeHandler=com.video_master.video_master_backend.util.StringToIntegerHandler}
         </if>
     </select>
 
+    <select id="getAllVideosByParams" parameterType="map" resultType="Integer">
+        SELECT count(id) FROM videos
+        <where>
+            <if test="movieType != null">
+                AND type = ( SELECT id FROM category WHERE category_name = #{movieType} )
+            </if>
+            <if test="movieSubType != null and !movieSubType.isEmpty()">
+                AND id IN ( SELECT video_category.video_id FROM video_category LEFT JOIN category ON category.id =
+                video_category.category_id WHERE category.category_name = #{movieSubType} )
+            </if>
+            <if test="movieRegion != null and !movieRegion.isEmpty()">
+                AND location_id = ( SELECT video_location.location_id FROM video_location WHERE location_name =
+                #{movieRegion} )
+            </if>
+            <if test="movieAging != null and !movieAging.isEmpty()">
+                AND publish_date = #{movieAging}
+            </if>
+        </where>
+    </select>
+
+    <select id="getSearchedVideoLikeName" parameterType="map" resultType="com.video_master.video_master_backend.model.dto.VideoSearchedDTO">
+        select videos.id, videos.`NAME`, videos.starring, videos.img_src,video_palys_number.plays_number
+        from videos
+        left join video_palys_number on videos.id = video_palys_number.video_id
+        <where>
+            <if test="searchedKeyWords != null and !searchedKeyWords.isEmpty()">
+                AND videos.`NAME` LIKE CONCAT('%', #{searchedKeyWords}, '%')
+            </if>
+            <if test="movieType != null and !movieType.isEmpty()">
+                AND type = ( SELECT id FROM category WHERE category_name = #{movieType} )
+            </if>
+        </where>
+        order by
+        <choose>
+            <when test="mostPlaysNumber != null and !mostPlaysNumber.isEmpty()">
+                video_palys_number.plays_number desc
+            </when>
+            <when test="leastPublishDate != null  and !leastPublishDate.isEmpty()">
+                videos.publish_date asc
+            </when>
+            <otherwise>
+                videos.id desc
+            </otherwise>
+        </choose>
+        LIMIT 30
+        <if test="targetOffset != null">
+            OFFSET
+            #{targetOffset, jdbcType=INTEGER, typeHandler=com.video_master.video_master_backend.util.StringToIntegerHandler}
+        </if>
+    </select>
+
+    <select id="getAllVideosLikeName" parameterType="map" resultType="Integer">
+        SELECT count(id) FROM videos
+        <where>
+            <if test="searchedKeyWords != null and !searchedKeyWords.isEmpty()">
+                AND videos.`NAME` LIKE CONCAT('%', #{searchedKeyWords}, '%')
+            </if>
+            <if test="movieType != null">
+                AND type = ( SELECT id FROM category WHERE category_name = #{movieType} )
+            </if>
+        </where>
+    </select>
 </mapper>

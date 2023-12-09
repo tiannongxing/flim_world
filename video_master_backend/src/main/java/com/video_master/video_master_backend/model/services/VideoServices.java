@@ -1,5 +1,6 @@
 package com.video_master.video_master_backend.model.services;
 
+import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 
 import java.util.List;
@@ -26,5 +27,11 @@ public interface VideoServices {
     String videoType(Integer typeId);
 
     List<VideoEntity> getVideos(Map<String,String> params);
+
+    Integer getAllVideosByParams(Map<String,String> params);
+
+    List<VideoSearchedDTO> getSearchedVideoLikeName(Map<String,String> params);
+
+    Integer getAllVideosLikeName(Map<String,String> params);
 
 }
