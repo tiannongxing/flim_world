@@ -18,6 +18,7 @@ let sendMsg = ref('')
 let callIp = ref(SERVER_IP)
 // 匿名用户以当前时间戳作为用户id
 let uid = ref(new Date().getTime())
+let movieId = ref(0)
 let messageSet = ref([])
 let message = ref({
   sender: '',
@@ -50,7 +51,7 @@ onMounted(() => {
   })
 
   //配置websocket 为了防止跨域问题，需要在vite.config.js中配置proxy
-  ws.value = new WebSocket(`ws://${callIp.value}/video-master/websocket/${uid.value}`) //服务器地址
+  ws.value = new WebSocket(`ws://${callIp.value}/video-master/websocket?uid=${encodeURIComponent(uid.value)}&roomId=${movieId.value}`) //服务器地址
 
 
   // 使用事件监听器，监听ws的状态变化
@@ -73,8 +74,8 @@ onMounted(() => {
     console.log("连接关闭")
   })
 
-  ws.value.addEventListener("error", () => {
-    console.log("连接错误")
+  ws.value.addEventListener("error", (err) => {
+    console.log(err)
   })
 
 
