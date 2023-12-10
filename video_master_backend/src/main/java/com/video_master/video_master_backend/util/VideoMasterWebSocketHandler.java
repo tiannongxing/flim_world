@@ -1,10 +1,14 @@
 package com.video_master.video_master_backend.util;
 
+import com.video_master.video_master_backend.model.entity.MsgSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,7 +24,7 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
     //保存当前会话用户名称和房间号
     private String uid;
     private String roomId;
-
+    private static final String systemSender = "系统通知";
 
     private static int onlineCount = 0;
 
@@ -29,7 +33,6 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
         // 获取到当前会话的用户名称和房间号
         getUidRoomId(session);
         String key = this.uid + "_" + this.roomId;
-        log.info(key);
         if (concurrentSet.containsKey(key)) {
             concurrentSet.remove(key);
             concurrentSet.put(key, session);
@@ -39,12 +42,17 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
             addOnlineCount();
         }
         log.info("用户【" + uid + "】连接成功，当前在线人数为:" + getOnlineCount());
-        TextMessage textMessage = new TextMessage("用户【" + uid + "】连接成功，当前在线人数为:" + getOnlineCount());
-        sendMessage(textMessage, key);
+
+        MsgSender msg = MsgSender.builder().senderId("0").senderName(systemSender).content("您已成功连接到服务器。").time(generateCurrentTime()).build();
+        String sendMsg = JackonUtil.ObjectToJSON(msg);
+        sendMessage(new TextMessage(sendMsg), key);
     }
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+        // 如果是一对一连接的话，需要确认发送地址
+        MsgSender msgSender = JackonUtil.JsonToObject(message.getPayload().toString(), MsgSender.class);
+        broadcast(new TextMessage(message.getPayload().toString()),msgSender.getRoomId());
 
     }
 
@@ -58,10 +66,12 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
         // 获取到当前会话的用户名称和房间号
         getUidRoomId(session);
         String key = uid + "_" + roomId;
+        log.info(key);
         if (concurrentSet.containsKey(key)) {
             concurrentSet.remove(key);
             // 在线数减1
             subOnlineCount();
+            log.info("用户【" + uid + "】退出，当前在线人数为:" + getOnlineCount());
         } else {
             log.info("用户【" + uid + "】退出失败，当前在线人数为:" + getOnlineCount());
         }
@@ -84,7 +94,6 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
     }
 
     private Map<String, String> parseQuery(String query) {
-        log.info(query);
         // 从请求的URL中解析出请求参数
         Map<String, String> queryParams = new HashMap<>();
         if (query != null && !query.isEmpty()) {
@@ -98,11 +107,10 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
         return queryParams;
     }
 
-    public void broadcast(WebSocketMessage<?> message) {
-        log.info(message.toString());
+    public void broadcast(WebSocketMessage<?> message, String roomId) {
         for (Map.Entry<String, WebSocketSession> unit : concurrentSet.entrySet()) {
             try {
-                if (unit.getValue().isOpen()) {
+                if (unit.getValue().isOpen() && Objects.equals(unit.getKey().split("_")[1],roomId)) {
                     unit.getValue().sendMessage(message);
                 }
             } catch (Exception e) {
@@ -128,7 +136,7 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
     }
 
     public void sendMessage(WebSocketMessage<?> message, String receiver) {
-        // 应同时给发信者和收信者同时发送信息
+        // 系统单方面发送信息
         try {
             if (concurrentSet.containsKey(receiver) && !Objects.equals(receiver, null)) {
                 sendMessageToUser(concurrentSet.get(receiver), message);
@@ -142,6 +150,13 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
         if (session != null && session.isOpen()) {
             session.sendMessage(message);
         }
+    }
+
+    private String generateCurrentTime() {
+        // 获取当前时分秒
+        LocalTime currentTime = LocalTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return currentTime.format(formatter);
     }
 
     private static synchronized void subOnlineCount() {

@@ -1,6 +1,6 @@
 <script setup>
 import {useRoute} from "vue-router";
-import {onBeforeMount, onBeforeUnmount, onMounted, ref} from "vue";
+import {onBeforeMount, onBeforeUnmount, onMounted, reactive, ref} from "vue";
 import {EnterOutlined} from "@ant-design/icons-vue";
 import "video.js/dist/video-js.css"
 import videojs from "video.js";
@@ -17,13 +17,16 @@ let moviePlayer = ref('')
 let sendMsg = ref('')
 let callIp = ref(SERVER_IP)
 // 匿名用户以当前时间戳作为用户id
-let uid = ref(new Date().getTime())
+// let uid = ref(new Date().getTime())
+let uid = ref(5)
 let movieId = ref(0)
-let messageSet = ref([])
-let message = ref({
-  sender: '',
-  content: '',
-  time: ''
+let messageSet = reactive([])
+let messageContent = ref({
+  senderId: '',
+  senderName: '',
+  roomId: '',
+  time: '',
+  content: ''
 })
 onBeforeMount(() => {
   // 通过页面传输消息获得影片的地址
@@ -55,14 +58,21 @@ onMounted(() => {
 
 
   // 使用事件监听器，监听ws的状态变化
-  ws.value.addEventListener("open", () => {
+  ws.value.addEventListener("open", (message) => {
     // todo 如果连接成功，就向浏览器窗口输出一些信息
   })
 
   ws.value.addEventListener("message", (message) => {
     // todo 如果收到服务器发送的消息，就把它显示在聊天框中 需要分辨服务器发送的是什么类型的消息
     if(typeof message.data === "string"){
-      console.log(message.data)
+      let msg = JSON.parse(message.data)
+      messageContent.value.senderId = msg.senderId
+      messageContent.value.senderName = msg.senderName
+      messageContent.value.time = msg.time
+      messageContent.value.content = msg.content
+      // 深拷贝对象，解决引用问题
+      let copy = JSON.parse(JSON.stringify(messageContent.value));
+      messageSet.push(copy)
     }
     if(message.data instanceof ArrayBuffer){
       let buffer = message.data
@@ -88,8 +98,13 @@ onBeforeUnmount(() => {
 })
 
 let socketSender = () => {
-  // ws.value.send(sendMsg.value)
-  console.log(sendMsg.value)
+  messageContent.value.senderId=uid
+  messageContent.value.senderName='测试用户'
+  messageContent.value.content = sendMsg.value
+  messageContent.value.roomId = movieId.value.toString()
+  messageContent.value.time = new Date().toLocaleTimeString()
+  ws.value.send(JSON.stringify(messageContent.value))
+  sendMsg.value = ''
 }
 </script>
 
@@ -102,19 +117,18 @@ let socketSender = () => {
       <video width="860" height="480" ref="videoPlayer" class="video-js player_location"
              style="margin: auto auto;">
       </video>
-      <div class="chat_panel scrollbar">
+      <div class="chat_panel">
         <!-- todo 通过websocket 实现实时聊天 -->
         <a-typography-text strong style="font-size: 16px;">聊天室<br/></a-typography-text>
-        <div class="display_chat">
+        <div class="display_chat scrollbar">
           <!--     显示聊天内容     -->
-          <div>
-            <a-typography-text v-for="item in messageSet" :key="item.time">
-              <a-typography-text :style="{color: '#1890ff',marginRight:'1em'}">{{ item.sender }}</a-typography-text>
-              <a-typography-text strong>{{ item.time }}</a-typography-text><br>
-              <a-typography-text>{{ item.content }}</a-typography-text>
-
-            </a-typography-text>
-          </div>
+          <a-row :gutter="[4,4]">
+            <a-col v-for="item in messageSet" :key="item.time">
+                <a-typography-text :style="{color: '#1890ff',marginRight:'1em'}">{{ item.senderName }}</a-typography-text>
+                <a-typography-text strong>{{ item.time }}</a-typography-text><br>
+                <a-typography-text>{{ item.content }}</a-typography-text>
+            </a-col>
+          </a-row>
         </div>
         <a-input placeholder="请输入聊天内容"  v-model:value="sendMsg">
           <template #suffix>
@@ -173,6 +187,8 @@ let socketSender = () => {
   margin: 0.5em 0;
   border: 1px solid #D9D9D9;
   border-radius: 1%;
+  padding: 0.5em;
+  overflow-y: scroll;
 
 }
 

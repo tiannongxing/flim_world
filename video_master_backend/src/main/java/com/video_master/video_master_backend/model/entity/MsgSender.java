@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class MsgSender {
     private String senderId;
     private String senderName;
+    private String roomId;
     private String content;
     private String time;
 }
