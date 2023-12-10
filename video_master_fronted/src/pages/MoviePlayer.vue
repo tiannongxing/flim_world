@@ -21,6 +21,7 @@ let callIp = ref(SERVER_IP)
 // 匿名用户以当前时间戳作为用户id
 let uid = ref(new Date().getTime())
 let movieId = ref(0)
+
 let messageSet = reactive([])
 let messageContent = ref({
   senderId: '',
@@ -38,7 +39,7 @@ onBeforeMount(() => {
   messageSender.then((res) => {
     moviePlayer.value = res.data;
 
-    // 配置播放器
+    // 配置播放器 没有防止直接在uri上的修改导致的一些问题
     myPlayer.value = videojs(videoPlayer.value, {
       poster: `/resources/${moviePlayer.value.imgSrc}`,
       controls: true,
@@ -64,27 +65,6 @@ onBeforeMount(() => {
 
 })
 onMounted(() => {
-  if(typeof moviePlayer.value !== ''){
-    myPlayer.value = videojs(videoPlayer.value, {
-      poster: `/resources/`,
-      controls: true,
-      sources: [
-        {
-          src: `/resources/${moviePlayer.value.uri}`,
-          type: `video/${moviePlayer.value.fileFormat}`,
-        }
-      ],
-      controlBar: {
-        remainingTimeDisplay: {
-          displayNegative: false
-        }
-      },
-      playbackRates: [0.5, 1, 1.5, 2]
-    }, () => {
-      myPlayer.value.log("play.....")
-    })
-  }
-
   //配置websocket 后端要注意跨域问题
   ws.value = new WebSocket(`ws://${callIp.value}/video-master/websocket?uid=${encodeURIComponent(uid.value)}&roomId=${movieId.value}`) //服务器地址
 
