@@ -91,7 +91,8 @@ onMounted(() => {
 
 })
 onBeforeUnmount(() => {
-  // 组件销毁之前注销播放器组件
+  // 组件销毁之前注销播放器组件|websocket连接
+  ws.value.close()
   if (myPlayer.value) {
     myPlayer.value.dispose()
   }

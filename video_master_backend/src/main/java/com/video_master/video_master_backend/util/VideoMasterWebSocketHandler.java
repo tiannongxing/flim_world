@@ -66,7 +66,6 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
         // 获取到当前会话的用户名称和房间号
         getUidRoomId(session);
         String key = uid + "_" + roomId;
-        log.info(key);
         if (concurrentSet.containsKey(key)) {
             concurrentSet.remove(key);
             // 在线数减1
