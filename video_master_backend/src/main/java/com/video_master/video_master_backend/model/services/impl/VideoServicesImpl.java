@@ -1,9 +1,12 @@
 package com.video_master.video_master_backend.model.services.impl;
 
+import com.video_master.video_master_backend.model.dto.VideoPlayerDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
+import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
 import com.video_master.video_master_backend.model.mapper.VideoMapper;
 import com.video_master.video_master_backend.model.services.VideoServices;
+import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
 import com.video_master.video_master_backend.util.VideosAttributes;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +92,12 @@ public class VideoServicesImpl implements VideoServices {
         return videoMapper.getAllVideosLikeName(params);
     }
 
-
+    @Override
+    public VideoPlayerVo getPlayerVideoByIdAndCurrentEpisode(Integer id, Integer currentEpisode) {
+        VideoPlayerEntity videoPlayerEntity = videoMapper.selectVideoByIdAndCurrentEpisode(id, currentEpisode);
+        VideoPlayerVo videoPlayerVo = VideoPlayerDTO.DTOToVo(VideoPlayerDTO.entityToDTO(videoPlayerEntity));
+        return videoPlayerVo;
+    }
 }
 
 

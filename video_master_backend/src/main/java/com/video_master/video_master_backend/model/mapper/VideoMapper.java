@@ -2,6 +2,7 @@ package com.video_master.video_master_backend.model.mapper;
 
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
+import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
 import com.video_master.video_master_backend.util.DynaSQLProviderBuilder;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.StatementType;
@@ -61,8 +62,9 @@ public interface VideoMapper {
             """)
     String getVideoTrueTypeById(@Param("id") int typeId);
 
-//    @SelectProvider(type=DynaSQLProviderBuilder.class,method = "selectVideos")
-//    List<VideoEntity> getVideos(Map<String,String> params);
+    @SelectProvider(type=DynaSQLProviderBuilder.class,method = "selectVideoByIdAndCurrentEpisode")
+    VideoPlayerEntity selectVideoByIdAndCurrentEpisode(@Param("id") Integer id,@Param("episode") Integer episode);
+
 
     //使用存储过程方式 只需调用存储过程和传入参数
     @Select("CALL query_video_by_id(#{rowId})")

@@ -5,7 +5,9 @@ import com.video_master.video_master_backend.model.dto.VideoListsDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedListDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
+import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
 import com.video_master.video_master_backend.model.services.VideoServices;
+import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
 import com.video_master.video_master_backend.model.vo.VideoVo;
 import com.video_master.video_master_backend.util.JackonUtil;
 import com.video_master.video_master_backend.util.VideosAttributes;
@@ -16,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -74,10 +74,6 @@ public class ResourceController {
 
     @GetMapping("/getMoviesLikeName")
     public String getMoviesLikeName(@RequestParam Map<String,String> params) {
-        log.info("""
-                得到的参数是：-------------------------------------------------》
-                """ +
-                params.toString());
         List<VideoSearchedDTO> searchedVideoLikeName = videoServices.getSearchedVideoLikeName(params);
         VideoSearchedListDTO videoSearchedListDTO = VideoSearchedListDTO.builder()
                 .videoList(searchedVideoLikeName)
@@ -88,4 +84,11 @@ public class ResourceController {
         return returnJson;
     }
 
+
+    @GetMapping("/getPlayingCorrect")
+    public String getPlayingCorrect(@RequestParam Map<String,String> params){
+        List<String> paramList = params.values().stream().toList();
+        VideoPlayerVo playerVideo = videoServices.getPlayerVideoByIdAndCurrentEpisode(Integer.parseInt(paramList.get(0)),Integer.parseInt(paramList.get(1)));
+        return JackonUtil.ObjectToJSON(playerVideo);
+    }
 }

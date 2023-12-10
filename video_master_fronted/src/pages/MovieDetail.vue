@@ -22,7 +22,7 @@ onBeforeMount(() => {
 const toPlayer = (clickEpisode) => {
   router.push({
     path: "/moviePlayer", query: {
-      movieId: displayMovieDetail.id,
+      movieId: displayMovieDetail.value.id,
       selectEpisode: clickEpisode,
     }
   })

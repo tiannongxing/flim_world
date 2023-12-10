@@ -15,7 +15,6 @@ const getMessageSender = function(path, ...msgs) {
 
     }
 
-    console.log(`${path}?${generatedMsgs}`)
     // 返回一个promise对象,在调用的使用使用then或者await来获取数据
     return axios.get(`${path}?${generatedMsgs}`)
 }
