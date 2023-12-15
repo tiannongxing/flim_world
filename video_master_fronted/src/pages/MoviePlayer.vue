@@ -39,7 +39,7 @@ onBeforeMount(() => {
   messageSender.then((res) => {
     moviePlayer.value = res.data;
 
-    // 配置播放器 没有防止直接在uri上的修改导致的一些问题
+    // 配置播放器 没有解决直接在uri上的修改导致的一些问题
     myPlayer.value = videojs(videoPlayer.value, {
       poster: `/resources/${moviePlayer.value.imgSrc}`,
       controls: true,
@@ -70,8 +70,8 @@ onMounted(() => {
 
 
   // 使用事件监听器，监听ws的状态变化
-  ws.value.addEventListener("open", (message) => {
-    // todo 如果连接成功，就向浏览器窗口输出一些信息
+  ws.value.addEventListener("open", () => {
+    // ws与后端建立连接成功会调用这个回调函数
   })
 
   ws.value.addEventListener("message", (message) => {

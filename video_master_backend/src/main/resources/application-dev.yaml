@@ -7,6 +7,16 @@ spring:
     username: root
     password: opr416
 
+  # 开发环境下，websocket线程池配置
+  websocket:
+    task:
+      execution:
+        pool:
+          # 配置线程池的长度为10，最大长度为30，线程池中队列的长度为1000
+          coreSize: 5
+          maxSize: 15
+          queueLength: 1000
+
 
 # 开发流程中，直接将sql语句打印到控制台，方便调试
 mybatis:
