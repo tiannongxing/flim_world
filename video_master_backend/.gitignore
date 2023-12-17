@@ -31,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/src/main/java/com/video_master/video_master_backend/exception/PasswordMismatchException.java
