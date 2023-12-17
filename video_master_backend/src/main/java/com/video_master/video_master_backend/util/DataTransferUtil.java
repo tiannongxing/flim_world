@@ -1,6 +1,6 @@
 package com.video_master.video_master_backend.util;
 
-import com.video_master.video_master_backend.model.services.VideoServices;
+import com.video_master.video_master_backend.services.VideoServices;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;

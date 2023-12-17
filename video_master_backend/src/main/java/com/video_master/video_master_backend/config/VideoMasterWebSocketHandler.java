@@ -1,12 +1,12 @@
-package com.video_master.video_master_backend.util;
+package com.video_master.video_master_backend.config;
 
 import com.video_master.video_master_backend.model.entity.MsgSender;
+import com.video_master.video_master_backend.util.JackonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -18,9 +18,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class VideoMasterWebSocketHandler implements WebSocketHandler {
 
-    //保存用户会话信息，用于服务端群发
+    //保存用户会话信息，用于服务端群发，在发送消息时需要获取这些信息
     private static final ConcurrentHashMap<String, WebSocketSession> concurrentSet = new ConcurrentHashMap<String, WebSocketSession>();
 
+    private final SocketExecutorConfig socketExecutor;
+
+    public VideoMasterWebSocketHandler(SocketExecutorConfig socketExecutor){
+        this.socketExecutor = socketExecutor;
+    }
     //保存当前会话用户名称和房间号
     private String uid;
     private String roomId;
@@ -30,32 +35,34 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        // 获取到当前会话的用户名称和房间号
-        getUidRoomId(session);
-        String key = this.uid + "_" + this.roomId;
-        if (concurrentSet.containsKey(key)) {
-            concurrentSet.remove(key);
-            concurrentSet.put(key, session);
-        } else {
-            concurrentSet.put(key, session);
-            // 在线数加1
-            addOnlineCount();
-        }
-        log.info("用户【" + uid + "】连接成功，当前在线人数为:" + getOnlineCount());
+        // 使用多线程来建立连接
+        socketExecutor.socketExecutor().submit( () -> {
+            // 业务逻辑
+            // 获取到当前会话的用户名称和房间号
+            getUidRoomId(session);
+            String key = this.uid + "_" + this.roomId;
+            if (concurrentSet.containsKey(key)) {
+                concurrentSet.remove(key);
+                concurrentSet.put(key, session);
+            } else {
+                concurrentSet.put(key, session);
+                // 在线数加1
+                addOnlineCount();
+            }
+            log.info("用户【" + uid + "】连接成功，当前在线人数为:" + getOnlineCount());
 
-        MsgSender msg = MsgSender.builder().senderId("0").senderName(systemSender).content("您已成功连接到服务器。").time(generateCurrentTime()).build();
-        String sendMsg = JackonUtil.ObjectToJSON(msg);
-        sendMessage(new TextMessage(sendMsg), key);
+            MsgSender msg = MsgSender.builder().senderId("0").senderName(systemSender).content("您已成功连接到服务器。").time(generateCurrentTime()).build();
+            String sendMsg = JackonUtil.ObjectToJSON(msg);
+            sendMessage(new TextMessage(sendMsg), key);
+        });
     }
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        // 如果是一对一连接的话，需要确认发送地址
+        // 判断消息封装后的信息，如果消息带有指定发送用户信息，则发送到指定用户，否则广播
         MsgSender msgSender = JackonUtil.JsonToObject(message.getPayload().toString(), MsgSender.class);
         broadcast(new TextMessage(message.getPayload().toString()),msgSender.getRoomId());
-
     }
-
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         log.info("WebSocket transport error: " + exception.getMessage());
@@ -63,17 +70,22 @@ public class VideoMasterWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        // 获取到当前会话的用户名称和房间号
-        getUidRoomId(session);
-        String key = uid + "_" + roomId;
-        if (concurrentSet.containsKey(key)) {
-            concurrentSet.remove(key);
-            // 在线数减1
-            subOnlineCount();
-            log.info("用户【" + uid + "】退出，当前在线人数为:" + getOnlineCount());
-        } else {
-            log.info("用户【" + uid + "】退出失败，当前在线人数为:" + getOnlineCount());
-        }
+        // 多线程处理用户退出
+        socketExecutor.socketExecutor().submit( () -> {
+            // 清理资源
+            // 获取到当前会话的用户名称和房间号
+            getUidRoomId(session);
+            String key = uid + "_" + roomId;
+            if (concurrentSet.containsKey(key)) {
+                concurrentSet.remove(key);
+                // 在线数减1
+                subOnlineCount();
+                log.info("用户【" + uid + "】退出，当前在线人数为:" + getOnlineCount());
+            } else {
+                log.info("用户【" + uid + "】退出失败，当前在线人数为:" + getOnlineCount());
+            }
+        });
+
     }
 
     private void getUidRoomId(WebSocketSession session) {

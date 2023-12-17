@@ -1,4 +1,4 @@
-package com.video_master.video_master_backend.model.mapper;
+package com.video_master.video_master_backend.mapper;
 
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;

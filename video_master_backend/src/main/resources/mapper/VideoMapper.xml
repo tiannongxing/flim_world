@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.video_master.video_master_backend.model.mapper.VideoMapper">
+<mapper namespace="com.video_master.video_master_backend.mapper.VideoMapper">
     <!-- 使用map作为参数输入的动态sql语句  -->
     <select id="getVideos" parameterType="map" resultType="VideoEntity">
         SELECT * FROM videos

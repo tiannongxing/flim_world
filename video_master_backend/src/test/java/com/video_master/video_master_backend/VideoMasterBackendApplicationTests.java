@@ -3,14 +3,13 @@ package com.video_master.video_master_backend;
 
 import com.video_master.video_master_backend.model.dto.VideoDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
-import com.video_master.video_master_backend.model.services.VideoServices;
+import com.video_master.video_master_backend.services.VideoServices;
 
 import com.video_master.video_master_backend.model.vo.VideoVo;
 import com.video_master.video_master_backend.util.DynaSQLProviderBuilder;
 import com.video_master.video_master_backend.util.VideosAttributes;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Param;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

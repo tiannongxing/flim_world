@@ -1,16 +1,15 @@
-package com.video_master.video_master_backend.model.services.impl;
+package com.video_master.video_master_backend.services.impl;
 
 import com.video_master.video_master_backend.model.dto.VideoPlayerDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
-import com.video_master.video_master_backend.model.mapper.VideoMapper;
-import com.video_master.video_master_backend.model.services.VideoServices;
+import com.video_master.video_master_backend.mapper.VideoMapper;
+import com.video_master.video_master_backend.services.VideoServices;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
 import com.video_master.video_master_backend.util.VideosAttributes;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,17 +1,14 @@
 <script setup>
-import {markRaw, onMounted, reactive, ref} from "vue";
+import {markRaw, nextTick, onMounted, provide, reactive, ref} from "vue";
 import locale from "ant-design-vue/es/locale/zh_CN.js";
-import {
-  AppstoreAddOutlined,
-  PoweroffOutlined,
-  RightOutlined,
-  SisternodeOutlined,
-  UserOutlined
-} from "@ant-design/icons-vue";
+import {PoweroffOutlined, UserOutlined} from "@ant-design/icons-vue";
 import router from "../routers/main.js";
 import LoginPanelByMail from "./loginComp/LoginPanelByMail.vue";
 import LoginPanelByPassword from "./loginComp/LoginPanelByPassword.vue";
 import RegisterComp from "./RegisterComp.vue";
+import {message} from "ant-design-vue";
+import {postMessageSender} from "../utils/MessageSender.js";
+import messageObj from "../utils/messageObj.js";
 
 onMounted(() => {
   user_display_size.width = avatar.value.size * 9
@@ -26,6 +23,34 @@ const font_color_list = reactive({
   selected: '#1677FF',
   unselect: '#000000'
 })
+
+const model_corresponds_path = reactive({
+  "registerModel": "/video-master/users/register",
+  "loginModel": "/video-master/users/login"
+})
+let clear_signal = ref('')
+let avatar_animate = ref('')
+const animate_list = ref(['avatar_magnify', 'avatar_shrink', 'user_display_show', 'user_display_hidden'])
+let header_image = ref('/static/unlogin.png')
+let is_login = ref(false)
+let show_user_display = ref(false)
+let display_user_panel = ref('')
+let font_color = ref(font_color_list.unselect)
+let display_sub_user_panel = ref('')
+let selected = ref("index")
+let callRegister = ref("")
+let callLogin = ref("")
+let find = ref("")
+let received = ref("")
+
+let registerHandler = (e) => {
+  received.value = e
+}
+
+let loginHandler = (e) => {
+  received.value = e
+}
+
 const title_img_click = () => {
   console.log('title_img_click')
 }
@@ -34,19 +59,11 @@ const change_font_color = (event, color) => {
   event.target.style.color = color
 }
 
-let find = ref("")
+
 let onSearch = () => {
   jumpToPage('/searchedMovie', find.value)
 }
-let avatar_animate = ref('')
-const animate_list = ref(['avatar_magnify', 'avatar_shrink', 'user_display_show', 'user_display_hidden'])
-let header_image = ref('/static/unlogin.png')
-let is_login = ref(true)
-let show_user_display = ref(false)
-let display_user_panel = ref('')
-let font_color = ref(font_color_list.unselect)
-let display_sub_user_panel = ref('')
-let selected = ref("index")
+
 let jumpToPage = (path, ...param) => {
   let params = "";
   if (param.length != 0) {
@@ -61,14 +78,78 @@ const modelOpen = reactive({
 const showModel = (modelName) => {
   modelOpen[modelName] = true
 }
-const handleOk = (modelName) => {
-  console.log(modelName);
-  if (1==1)
-    modelOpen[modelName] = false
-  // 输入的信息有误，不退出注册页面，弹出报错信息
+provide("callLogin", callLogin)
+provide("clear", clear_signal)
+const handleRegisterOk = (modelName, successText, errorText) => {
+  let errAppend = "" // 为空表示没有错误信息
+  callRegister.value = Date.now().toString()
+  nextTick(() => {
+    let rec = JSON.parse(received.value)
+    let params = []
+    // 通过遍历对象生成传输的消息对象数组，并通过ES6展开语法发送到自定义的postMessage方法的不定参数中
+    for (let key in rec) {
+      params.push(new messageObj(key, rec[key]).getObject())
+    }
+    let postMessage = postMessageSender(
+        model_corresponds_path[modelName]
+        , ...params
+    );
+
+    postMessage.then((res) => {
+      modelOpen[modelName] = false
+      message.success(successText)
+      clear_signal.value = Date.now().toString()
+    }).catch((err) => {
+      // 后台会验证用户输入是否合法，如不通过，会通过err返回错误信息
+      let output = ""
+      err.response.data.forEach(item => {
+        // 无法换行
+        output += `${errorText}: ${item}`;
+      })
+      message.error(`${output}`, 3)
+    })
+  })
+  received.value = ""
 };
 
+const handleLoginOk = (modelName, successText, errorText) => {
+  // 父组件向间隔超过一层的子组件传值应该使用依赖注入 provide,后代可以直接使用inject调用
+  callLogin.value = Date.now().toString()
+  nextTick(() => { // 保证接收到的数据刷新
+    let rec = JSON.parse(received.value)
+    let params = []
+    let tar =""
+    if (rec.type === "pass") {
+      for (let key in rec.data) {
+        params.push(new messageObj(key, rec.data[key]).getObject())
+      }
+      tar = "/password"
 
+    } else if (rec.type === "mail") {
+      for (let key in rec.data) {
+        params.push(new messageObj(key, rec.data[key]).getObject())
+      }
+      tar = "/mail"
+    }
+    let postMessage = postMessageSender(
+        model_corresponds_path[modelName] + tar
+        , ...params
+    );
+
+    postMessage.then((res)=>{
+      if(res.data === true){
+        modelOpen[modelName] = false
+        message.success(successText)
+        clear_signal.value = Date.now().toString()
+      }else {
+        message.error("插入失败")
+      }
+    }).catch((err)=>{
+      // 输入的信息有误，不退出注册页面，弹出报错信息
+      message.error(`${errorText}: ${err.response.data}`)
+    })
+  })
+};
 
 let loginPanelShowList = reactive([
   markRaw(LoginPanelByPassword),
@@ -76,11 +157,11 @@ let loginPanelShowList = reactive([
 ])
 
 let selectedLoginPanel = ref(loginPanelShowList[0])
-let jumpToAdmin = ()=>{
+let jumpToAdmin = () => {
   window.location.href = 'src/views/administrator/'
 }
 
-let jumpToIndividualCenter = ()=>{
+let jumpToIndividualCenter = () => {
   window.location.href = 'src/views/individual_center/'
 }
 </script>
@@ -222,20 +303,24 @@ let jumpToIndividualCenter = ()=>{
     </a-row>
     <a-config-provider :locale="locale"> <!-- 语言设置 -->
       <!-- 登录模态窗口 后端返回数据后再判断窗口是否需要退出 -->
-      <a-modal v-model:open="modelOpen.loginModel" title="登录" ok-text="登录" @ok="handleOk('loginModel')">
+      <a-modal v-model:open="modelOpen.loginModel" title="登录" ok-text="登录"
+               @ok="handleLoginOk('loginModel','登录成功','登录失败')">
         <div class="align-center">
           <a-button type="link" :disabled="selectedLoginPanel === loginPanelShowList[0]"
-                    @click="selectedLoginPanel=loginPanelShowList[0]">密码登录</a-button>
+                    @click="selectedLoginPanel=loginPanelShowList[0]">密码登录
+          </a-button>
           <a-typography-text>|</a-typography-text>
           <a-button type="link" :disabled="selectedLoginPanel === loginPanelShowList[1]"
-                    @click="selectedLoginPanel=loginPanelShowList[1]">邮箱登录</a-button>
+                    @click="selectedLoginPanel=loginPanelShowList[1]">邮箱登录
+          </a-button>
         </div>
-        <component :is="selectedLoginPanel"></component>
+        <component :is="selectedLoginPanel" @putUser="loginHandler"></component>
       </a-modal>
 
       <!-- 注册模态窗口 -->
-      <a-modal v-model:open="modelOpen.registerModel" title="注册" ok-text="注册" @ok="handleOk('registerModel')">
-        <register-comp></register-comp>
+      <a-modal v-model:open="modelOpen.registerModel" title="注册" ok-text="注册"
+               @ok="handleRegisterOk('registerModel','注册成功','注册失败')">
+        <register-comp :callRegister="callRegister" @putRegister="registerHandler"></register-comp>
       </a-modal>
     </a-config-provider>
   </div>
@@ -346,7 +431,6 @@ vertical_align_center {
 .backend:hover {
   color: white;
 }
-
 
 
 </style>

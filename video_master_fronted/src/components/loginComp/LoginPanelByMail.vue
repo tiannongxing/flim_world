@@ -1,21 +1,33 @@
 <script setup>
-import {reactive, ref} from "vue";
+import {inject, reactive, ref, watch} from "vue";
 import axios from "axios";
 
 let loginDataSet = reactive({
-  loginMethod: "mail",
-  loginData: {
-    username: "",
-    password: "",
+    type: "email",
+    data:{
     email: "",
     code: "",
-  },
+    }
 })
 
 let isLoading = ref(false)
 let CaptchaContent = ref('验证码')
 let disableSendButton = ref(false)
 let intervalId = ref(null)
+let emits = defineEmits(['putUser'])
+// 依赖注入传入的就是一个ref对象
+let callLogin = inject("callLogin")
+let clearSignal = inject("clear")
+watch(()=>callLogin.value,()=>{
+  emits('putUser',JSON.stringify(loginDataSet))
+})
+
+watch(()=>clearSignal.value,()=>{
+  loginDataSet.email = ""
+  loginDataSet.code = ""
+})
+
+
 let sendCheckCode = (mail) => {
   isLoading = true;
   axios.post("/certification/getCaptcha", {
@@ -39,9 +51,6 @@ let sendCheckCode = (mail) => {
     // todo 发往错误提示页面
   })
 }
-
-
-//todo 尝试：当emitter调用该模块时使用回调函数返回该模块中填写的数据。
 </script>
 
 <template>
@@ -50,13 +59,13 @@ let sendCheckCode = (mail) => {
       <h3>普通登录</h3>
       <div>
         <a-typography-text>邮箱：</a-typography-text>
-        <a-input v-model:value.lazy="loginDataSet.loginData.email" style="width: 70%" autofocus placeholder="邮箱"/>
+        <a-input v-model:value.lazy="loginDataSet.email" style="width: 70%" autofocus placeholder="邮箱"/>
       </div>
       <div class="margin-top-medium">
         <a-typography-text>验证码：</a-typography-text>
-        <a-input v-model:value.lazy="loginDataSet.loginData.code" style="width: 40%" autofocus placeholder="验证码"/>
+        <a-input v-model:value.lazy="loginDataSet.code" style="width: 40%" autofocus placeholder="验证码"/>
         <a-button type="primary" style="width: 20%;margin-left: 8%" :loading="isLoading" :disabled="disableSendButton"
-                  @click="sendCheckCode(loginDataSet.loginData.email)">{{ CaptchaContent }}
+                  @click="sendCheckCode(loginDataSet.email)">{{ CaptchaContent }}
         </a-button>
       </div>
     </div>

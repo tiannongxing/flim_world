@@ -1,11 +1,23 @@
 #开发配置文件
-#配置mysql数据库
+
 spring:
+  #配置mysql数据库 关系型数据库
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/vedio-master?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
     username: root
     password: opr416
+
+  data:
+    #配置redis数据库 非关系型数据库
+    redis:
+      host: 192.168.32.137
+      port: 6379
+      database: 1
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
 
   # 开发环境下，websocket线程池配置
   websocket:
@@ -16,6 +28,22 @@ spring:
           coreSize: 5
           maxSize: 15
           queueLength: 1000
+  mail:
+    host: smtp.163.com
+    protocol: smtp
+    default-encoding: UTF-8
+    username: 17858268342@163.com
+    password: OEWPCFWGCLPQVXPG
+    test-connection: true
+    properties:
+      mail:
+        # 定义邮件发送相关信息
+        smtp:
+          auth: true # 需要身份验证
+          starttls:
+            enable: true
+            required: true
+
 
 
 # 开发流程中，直接将sql语句打印到控制台，方便调试
