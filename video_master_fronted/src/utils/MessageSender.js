@@ -10,7 +10,6 @@ const getMessageSender = function(path, ...msgs) {
 }
 
 const postMessageSender = (path, ...msgs) => {
-    console.log(msgs)
     let params = {}
     if(msgs.length > 0){
         msgs.forEach(item => {
@@ -18,7 +17,6 @@ const postMessageSender = (path, ...msgs) => {
         })
     }
 
-    console.log(params)
     return msgs.length>0?axios.post(path,params):axios.post(path)
 }
 

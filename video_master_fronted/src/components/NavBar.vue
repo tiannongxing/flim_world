@@ -1,5 +1,5 @@
 <script setup>
-import {markRaw, nextTick, onMounted, provide, reactive, ref} from "vue";
+import {markRaw, nextTick, onBeforeMount, onMounted, provide, reactive, ref, watch} from "vue";
 import locale from "ant-design-vue/es/locale/zh_CN.js";
 import {PoweroffOutlined, UserOutlined} from "@ant-design/icons-vue";
 import router from "../routers/main.js";
@@ -9,11 +9,11 @@ import RegisterComp from "./RegisterComp.vue";
 import {message} from "ant-design-vue";
 import {postMessageSender} from "../utils/MessageSender.js";
 import messageObj from "../utils/messageObj.js";
+import TokenMapHandler from "../utils/TokenMapHandler.js";
+import store from "../store/store.js";
 
-onMounted(() => {
-  user_display_size.width = avatar.value.size * 9
-  user_display_size.height = avatar.value.size * 12
-})
+
+
 const avatar = ref(null)
 const user_display_size = reactive({
   width: 0,
@@ -28,11 +28,16 @@ const model_corresponds_path = reactive({
   "registerModel": "/video-master/users/register",
   "loginModel": "/video-master/users/login"
 })
+
 let clear_signal = ref('')
 let avatar_animate = ref('')
 const animate_list = ref(['avatar_magnify', 'avatar_shrink', 'user_display_show', 'user_display_hidden'])
 let header_image = ref('/static/unlogin.png')
-let is_login = ref(false)
+let is_login = reactive({
+  isLogin: false,
+  user: {}
+})
+let put_user = defineEmits(['putUser'])
 let show_user_display = ref(false)
 let display_user_panel = ref('')
 let font_color = ref(font_color_list.unselect)
@@ -43,6 +48,10 @@ let callLogin = ref("")
 let find = ref("")
 let received = ref("")
 
+onMounted(() => {
+  user_display_size.width = avatar.value.size * 9
+  user_display_size.height = avatar.value.size * 12
+})
 let registerHandler = (e) => {
   received.value = e
 }
@@ -112,39 +121,54 @@ const handleRegisterOk = (modelName, successText, errorText) => {
   received.value = ""
 };
 
+watch(() => is_login.user, (pre, next) => {
+  put_user("putUser", is_login)
+})
+
+watch(()=> store.state.userState.user,(pre)=>{
+  console.log(pre)
+  if(pre.id !== undefined){
+    // 表示登录用户没被清空，将用户置为登录状态
+    is_login.isLogin = true
+    is_login.user = pre
+  }
+})
+
 const handleLoginOk = (modelName, successText, errorText) => {
   // 父组件向间隔超过一层的子组件传值应该使用依赖注入 provide,后代可以直接使用inject调用
   callLogin.value = Date.now().toString()
   nextTick(() => { // 保证接收到的数据刷新
     let rec = JSON.parse(received.value)
     let params = []
-    let tar =""
+    let tar = ""
     if (rec.type === "pass") {
       for (let key in rec.data) {
-        params.push(new messageObj(key, rec.data[key]).getObject())
+        params.push(new messageObj(key, rec[key]).getObject())
       }
       tar = "/password"
 
     } else if (rec.type === "mail") {
       for (let key in rec.data) {
-        params.push(new messageObj(key, rec.data[key]).getObject())
+        params.push(new messageObj(key, rec[key]).getObject())
       }
       tar = "/mail"
     }
+
     let postMessage = postMessageSender(
         model_corresponds_path[modelName] + tar
         , ...params
     );
 
-    postMessage.then((res)=>{
-      if(res.data === true){
-        modelOpen[modelName] = false
-        message.success(successText)
-        clear_signal.value = Date.now().toString()
-      }else {
-        message.error("插入失败")
-      }
-    }).catch((err)=>{
+    postMessage.then((res) => {
+      let tokenMap = res.data
+      //获得后台的map对象，并将token存入本地存储
+      let userObj = TokenMapHandler.parsingMap(tokenMap)
+      is_login.isLogin = true
+      is_login.user = userObj
+      modelOpen[modelName] = false
+      message.success(successText)
+      clear_signal.value = Date.now().toString()
+    }).catch((err) => {
       // 输入的信息有误，不退出注册页面，弹出报错信息
       message.error(`${errorText}: ${err.response.data}`)
     })
@@ -164,6 +188,7 @@ let jumpToAdmin = () => {
 let jumpToIndividualCenter = () => {
   window.location.href = 'src/views/individual_center/'
 }
+
 </script>
 
 <template>
@@ -218,14 +243,14 @@ let jumpToIndividualCenter = () => {
         <a-row class="vertical_center align-center">
           <a-col :span="24">
             <div class="inline_block"
-                 @mouseenter="is_login===true?(display_user_panel=animate_list[2],avatar_animate=animate_list[0]):display_user_panel=animate_list[2]"
-                 @mouseleave="is_login===true?(display_user_panel=animate_list[3],avatar_animate=animate_list[1]):display_user_panel=animate_list[3]"
+                 @mouseenter="is_login.isLogin===true?(display_user_panel=animate_list[2],avatar_animate=animate_list[0]):display_user_panel=animate_list[2]"
+                 @mouseleave="is_login.isLogin===true?(display_user_panel=animate_list[3],avatar_animate=animate_list[1]):display_user_panel=animate_list[3]"
             >
               <!-- 非登录状态下展示框-->
               <div
                   class="user_display"
                   :class="display_user_panel"
-                  v-if="!is_login"
+                  v-if="!is_login.isLogin"
                   :style="
                 {
                 'width':user_display_size.width+'px',
@@ -256,7 +281,7 @@ let jumpToIndividualCenter = () => {
               <!-- 登录状态下展示框-->
               <div class="user_display"
                    :class="display_user_panel"
-                   v-if="is_login"
+                   v-if="is_login.isLogin"
                    :style="
                {
                 'width':user_display_size.width+'px',
@@ -280,17 +305,19 @@ let jumpToIndividualCenter = () => {
                 </div>
               </div>
               <!-- 头像展示框-->
-              <div
-                  :class="avatar_animate"
-                  :style="{
+              <div style="width: 32px;height: 32px">
+                <div
+                    :class="avatar_animate"
+                    :style="{
                   margin: 30+'%',
                   transform: 'translateX(-30%)',
                     }">
-                <a-avatar ref="avatar" :size="32">
-                  <template #icon>
-                    <img :src="header_image">
-                  </template>
-                </a-avatar>
+                  <a-avatar ref="avatar" :size="32">
+                    <template #icon>
+                      <img :src="is_login.isLogin == false?header_image:`/users/${is_login.user.img}`">
+                    </template>
+                  </a-avatar>
+                </div>
               </div>
             </div>
           </a-col>

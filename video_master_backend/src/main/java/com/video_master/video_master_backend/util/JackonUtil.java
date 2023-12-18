@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JackonUtil {
@@ -41,5 +42,13 @@ public class JackonUtil {
            throw new RuntimeException(e);
        }
    }
+
+    public static String MapToJson(Map map){
+        try {
+            return objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
