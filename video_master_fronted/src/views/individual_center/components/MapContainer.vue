@@ -1,6 +1,6 @@
 <script setup>
 import AMapLoader from '@amap/amap-jsapi-loader';
-import {onMounted, onUnmounted, reactive} from "vue";
+import {onMounted, onUnmounted, reactive, watch} from "vue";
 
 
 let map = '';
@@ -10,8 +10,13 @@ const mapData = reactive({
   selectedLocation: {},
   selectedAddress: '',
 });
-
-
+let props = defineProps({
+  ping: String
+})
+let emits = defineEmits(["putLocation"])
+watch(()=>props.ping,(value,oldValue)=>{
+  emits("putLocation",mapData)
+},{deep: true})
 onMounted(() => {
   window._AMapSecurityConfig = {
     securityJsCode: 'ed605ce1fc709611c168142c381174a7',

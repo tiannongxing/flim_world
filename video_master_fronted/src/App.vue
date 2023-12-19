@@ -9,13 +9,6 @@ import MessageObj from "./utils/messageObj.js";
 import {message} from "ant-design-vue";
 import store from "./store/store.js";
 
-
-let is_user_login = reactive({
-
-})
-let putUserHandler = (user)=>{
-  is_user_login = user
-}
 onMounted(()=>{
   // localStorage.removeItem("token")
   let token = localStorage.getItem("token")
@@ -26,8 +19,8 @@ onMounted(()=>{
         (res)=>{
           // 对于环境比较复杂的需要用于全局的信息，使用vuex，依赖注入无法处理这种状况
           store.dispatch("updateUserState",{
-            action: "input",
-            data: res.data
+            isLogin: true,
+            user: res.data
           })
         }
     ).catch(
@@ -43,7 +36,7 @@ onMounted(()=>{
 
 <template>
   <a-config-provider :locale="locale">
-    <nav-bar class="navbar_style" @putUser="putUserHandler"></nav-bar>
+    <nav-bar class="navbar_style"></nav-bar>
     <router-view :key="useRoute().fullPath">
     </router-view>
     <Footer></Footer>

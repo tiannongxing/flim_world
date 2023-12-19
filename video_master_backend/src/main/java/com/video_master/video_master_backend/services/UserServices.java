@@ -20,5 +20,5 @@ public interface UserServices {
     Map<String,UserEntity> UserCertificationByToken(String token);
     UserEntity getUserById(Long id);
 
-    Boolean userExit(Long id);
+    void userExit(Long id);
 }

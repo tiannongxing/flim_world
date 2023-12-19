@@ -1,5 +1,5 @@
 <script setup>
-import {markRaw, nextTick, onBeforeMount, onMounted, provide, reactive, ref, watch} from "vue";
+import {markRaw, nextTick, onMounted, provide, reactive, ref, watch} from "vue";
 import locale from "ant-design-vue/es/locale/zh_CN.js";
 import {PoweroffOutlined, UserOutlined} from "@ant-design/icons-vue";
 import router from "../routers/main.js";
@@ -7,11 +7,10 @@ import LoginPanelByMail from "./loginComp/LoginPanelByMail.vue";
 import LoginPanelByPassword from "./loginComp/LoginPanelByPassword.vue";
 import RegisterComp from "./RegisterComp.vue";
 import {message} from "ant-design-vue";
-import {postMessageSender} from "../utils/MessageSender.js";
+import {getMessageSender, postMessageSender} from "../utils/MessageSender.js";
 import messageObj from "../utils/messageObj.js";
 import TokenMapHandler from "../utils/TokenMapHandler.js";
 import store from "../store/store.js";
-
 
 
 const avatar = ref(null)
@@ -87,6 +86,21 @@ const modelOpen = reactive({
 const showModel = (modelName) => {
   modelOpen[modelName] = true
 }
+
+let userLogout = () => {
+  getMessageSender("/video-master/users/logout", new messageObj("id", is_login.user.id).getObject())
+      .then((res) => {
+        // 确认注销成功后，清除localstorage中的token信息
+        avatar_animate=animate_list[1]
+        store.dispatch("updateUserState", {isLogin: false})
+        localStorage.removeItem("token")
+        message.success("注销成功")
+
+      })
+      .catch((err) => {
+        message.error(`注销失败,错误信息${err.message}`)
+      })
+}
 provide("callLogin", callLogin)
 provide("clear", clear_signal)
 const handleRegisterOk = (modelName, successText, errorText) => {
@@ -122,16 +136,17 @@ const handleRegisterOk = (modelName, successText, errorText) => {
 };
 
 watch(() => is_login.user, (pre, next) => {
-  put_user("putUser", is_login)
+  // 当当前登录用户的状态改变时，更新store中的状态信息
+  store.dispatch("updateUserState", is_login)
 })
 
-watch(()=> store.state.userState.user,(pre)=>{
-  console.log(pre)
-  if(pre.id !== undefined){
-    // 表示登录用户没被清空，将用户置为登录状态
-    is_login.isLogin = true
-    is_login.user = pre
-  }
+watch(() => store.state.userState, (oldValue, newValue) => {
+  let recObj = JSON.parse(JSON.stringify(oldValue))
+  is_login.isLogin = recObj.isLogin
+  is_login.user = recObj.user
+
+}, {
+  deep: true // 启动深度观察,如果需要观察对象下的多个属性
 })
 
 const handleLoginOk = (modelName, successText, errorText) => {
@@ -165,6 +180,8 @@ const handleLoginOk = (modelName, successText, errorText) => {
       let userObj = TokenMapHandler.parsingMap(tokenMap)
       is_login.isLogin = true
       is_login.user = userObj
+      //将登录对象放到store中
+      store.dispatch("updateUserState", is_login)
       modelOpen[modelName] = false
       message.success(successText)
       clear_signal.value = Date.now().toString()
@@ -299,7 +316,7 @@ let jumpToIndividualCenter = () => {
                   </a-button>
                   <a-button @mouseenter=""
                             @mouseleave=""
-                            class="align-left" type="text" size="large" block>
+                            class="align-left" type="text" size="large" @click="userLogout" block>
                     <span><PoweroffOutlined/> 退出登录</span>
                   </a-button>
                 </div>

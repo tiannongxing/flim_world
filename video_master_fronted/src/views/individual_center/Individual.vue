@@ -1,13 +1,18 @@
 <script setup>
-import {onBeforeUnmount, reactive, ref} from 'vue';
+import {computed, onBeforeUnmount, onMounted, reactive, ref} from 'vue';
 import router from "./routers/main.js";
 import emitter from "../../utils/EventBus.js";
+import {getMessageSender} from "../../utils/MessageSender.js";
+import MessageObj from "../../utils/messageObj.js";
+import {message} from "ant-design-vue";
+import {PoweroffOutlined} from "@ant-design/icons-vue";
+import store from "./store/store.js";
 
 const onCollapse = (collapsed, type) => {
-  console.log(collapsed, type);
+
 };
 const onBreakpoint = broken => {
-  console.log(broken);
+
 };
 const selectedKeys = ref([0]);
 let pushToTargetPage = (page,...msg)=>{
@@ -18,7 +23,8 @@ let pushToTargetPage = (page,...msg)=>{
     router.push({path: page,query: {params:sets}})
   }
 }
-
+const animate_list = ref(['user_display_show', 'user_display_hidden'])
+let selectAnimate = ref('')
 let intViewportHeight = ref(document.documentElement.clientHeight);
 let operationSet = reactive([
   {
@@ -47,43 +53,85 @@ emitter.on("changeSelected",(param)=>{
   selectedKeys.value = [param.changeTo]
 })
 
+
+
 onBeforeUnmount(()=>{
   // 在页面跳转前，结束挂载事件
   emitter.off("changeSelected")
 })
+
+onMounted(()=>{
+  // localStorage.removeItem("token")
+  let token = localStorage.getItem("token")
+  if(token){
+    // 如果token存在，则向后端发送请求，获取数据
+    let promise = getMessageSender("/video-master/users/login/token",new MessageObj("token",localStorage.getItem("token")).getObject())
+    promise.then(
+        (res)=>{
+          // 对于环境比较复杂的需要用于全局的信息，使用vuex，依赖注入无法处理这种状况
+          store.dispatch("updateUserState",{
+            isLogin: true,
+            user: res.data
+          })
+        }
+    ).catch(
+        (err)=>{
+          message.error(`发生错误： ${err}`)
+        }
+    )
+  }
+  //防止页面刷新后还留在其他页面。在页面挂载完毕后将页面调整到首页
+  router.push("/home")
+})
+
+const avatarPath = computed(()=>{
+  return "/users/"+store.state.userState.user.img
+})
 </script>
 
 <template>
-  <a-layout :style="{height : intViewportHeight+'px'}">
-    <a-layout-sider
-        breakpoint="lg"
-        collapsed-width="0"
-        @collapse="onCollapse"
-        @breakpoint="onBreakpoint"
-    >
-      <div class="logo user_select_forbidden">
-        <a-typography-title style="color: #5FB878" :level="3">个人中心</a-typography-title>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
-        <a-menu-item v-for="(operation,index) in operationSet" :key="index" @click="pushToTargetPage(operation.to)">
-          <span class="nav-text">{{ operation.name }}</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
-    <a-layout>
-      <a-layout-header :style="{ background: '#fff', padding: 0 }"/>
-      <a-layout-content :style="{ margin: '24px 16px 0' }">
-        <div :style="{ padding: '24px', background: '#fff', minHeight: `calc(${intViewportHeight}px - 10em)`,
-         height: 'auto !important'}">
-          <router-view></router-view>
+  <div class="container">
+    <a-layout :style="{height : intViewportHeight+'px'}">
+      <a-layout-sider
+          breakpoint="lg"
+          collapsed-width="0"
+          @collapse="onCollapse"
+          @breakpoint="onBreakpoint"
+      >
+        <div class="logo user_select_forbidden">
+          <a-typography-title style="color: #5FB878" :level="3">个人中心</a-typography-title>
         </div>
-      </a-layout-content>
-      <a-layout-footer style="text-align: center">
-        Ant Design ©2018 Created by Ant UED
-      </a-layout-footer>
-    </a-layout>
-  </a-layout>
+        <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
+          <a-menu-item v-for="(operation,index) in operationSet" :key="index" @click="pushToTargetPage(operation.to)">
+            <span class="nav-text">{{ operation.name }}</span>
+          </a-menu-item>
+        </a-menu>
+      </a-layout-sider>
+      <a-layout>
+        <a-layout-header :style="{ background: '#fff', padding: 0 , position:'relative', zIndex:4}">
+          <div class="avatar-wrapper" @mouseenter="selectAnimate=animate_list[0]" @mouseleave="selectAnimate=animate_list[1]">
+            <a-avatar :size="32" class="avatar" wrap :src="avatarPath">
+            </a-avatar>
+            <div class="operator-wrapper" :class="selectAnimate">
+              <a-button class="align-left"  type="text" size="large" @click="" block>
+                <span><PoweroffOutlined/> 退出登录</span>
+              </a-button>
+            </div>
+          </div>
 
+        </a-layout-header>
+        <a-layout-content :style="{ margin: '24px 16px 0' }">
+          <div :style="{ padding: '24px', background: '#fff', minHeight: `calc(${intViewportHeight}px - 10em)`,
+         height: 'auto !important'}">
+            <router-view></router-view>
+          </div>
+        </a-layout-content>
+        <a-layout-footer style="text-align: center">
+          Ant Design ©2018 Created by Ant UED
+        </a-layout-footer>
+      </a-layout>
+    </a-layout>
+  </div>
 </template>
 
 <style scoped>
@@ -113,4 +161,49 @@ onBeforeUnmount(()=>{
   margin-left: 2em;
   margin-top: 1em;
 }
+
+.avatar-wrapper{
+  display: inline-block;
+  position: absolute;
+  right: calc(7vw);
+  text-align: center;
+  z-index: -1;
+  width: auto;
+  height: auto;
+}
+
+.operator-wrapper{
+  display: inline-block;
+  position: absolute;
+  background: white;
+  height: auto;
+  left: calc(-5em + 16px);
+  bottom: 0%;
+  border: 1px solid #B3B3B3;
+  z-index: 5;
+  border-radius: 5px;
+  transform: translateY(100%);
+  padding: 0 1ex;
+  opacity: 0;
+}
+
+.avatar{
+  position: relative;
+  z-index: 999;
+}
+
+.user_display_show {
+  animation: fadeIn 0.5s;
+  animation-fill-mode: forwards;
+  visibility: visible !important;
+  opacity: 1;
+}
+
+.user_display_hidden {
+  animation: fadeOut 0.5s;
+  animation-fill-mode: forwards;
+  visibility: hidden !important;
+  opacity: 0;
+}
+
 </style>

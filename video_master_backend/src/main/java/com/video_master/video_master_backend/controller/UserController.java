@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @Slf4j
@@ -72,6 +73,13 @@ public class UserController {
         log.info(String.valueOf(uid));
         UserEntity userById = userServices.getUserById(uid);
         return userById;
+    }
+
+    @GetMapping("/logout")
+    void userLogout(@RequestParam("id") Long id){
+        if(!Objects.equals(id,null)){ // 确保传入的id值不为空
+            userServices.userExit(id);
+        }
     }
 
 }

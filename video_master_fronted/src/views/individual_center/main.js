@@ -8,9 +8,11 @@ import Router from './routers/main.js'
 import './style.css'
 import './demo-center.css'
 
-
+//vuex仓库
+import store from "./store/store.js"
 
 createApp(Individual)
     .use(Antd)
     .use(Router)
+    .use(store)
     .mount('#app')

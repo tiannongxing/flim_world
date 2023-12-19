@@ -76,8 +76,6 @@ public class UserServicesImpl implements UserServices {
     }
 
     @Override
-    @CacheEvict(key="#id")
-    public Boolean userExit(Long id) {
-        return null;
-    }
+    @CacheEvict(key="#id",value = "userCache")
+    public void userExit(Long id) {}
 }

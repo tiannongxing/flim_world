@@ -23,3 +23,8 @@
 .inline_block{
     display: inline-block;
 }
+
+.container{
+    min-width: 1200px;
+    min-height: 960px;
+}

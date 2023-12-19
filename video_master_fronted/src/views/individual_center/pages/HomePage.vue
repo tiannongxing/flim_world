@@ -1,21 +1,11 @@
 <script setup>
 import axios from "axios";
-import {reactive} from "vue";
+import {computed, reactive} from "vue";
 import {CALL_IP} from "/src/const_param.js";
 import router from "../routers/main.js";
 import emitter from "../../../utils/EventBus.js";
-
-let userDataSet = reactive({})
-let getUserDataSet = (token) => {
-  //todo 使用token从后端的redis数据库中获取用户信息
-  axios.post('/video-master/getUserDataByToken', {
-    // 传输localStorage中存放的token
-  }).then((res) => {
-
-  }).catch((res) => {
-
-  })
-}
+import store from "../store/store.js";
+import {message} from "ant-design-vue";
 
 let jumpToSecurityDetailPage = ()=>{
   emitter.emit("changeSelected", {
@@ -30,18 +20,34 @@ let jumpToChangeMsg = ()=>{
   })
   router.push("/message")
 }
+
+let loginUser = computed(()=>{
+  if (store.state.userState.user){
+    return JSON.parse(JSON.stringify(store.state.userState.user))
+  }
+  else {
+    message.error("你没登录就进来了呢，真厉害！！")
+  }
+})
+
+let avatarPath = computed(()=>{
+  if (loginUser){
+    return '/users/' + loginUser.value.img
+  }else {
+
+  }
+})
 </script>
 
 <template>
   <div class="home_container">
     <div>
       <div class="avatar_container">
-        <a-avatar :size="{ xs: 16, sm: 24, md: 32, lg: 52, xl: 64, xxl: 80 }">
-          <img src="/users/avatar/noise.jpg" class="avatar_css">
+        <a-avatar :size="{ xs: 16, sm: 24, md: 32, lg: 52, xl: 64, xxl: 80 }" :src="avatarPath">
         </a-avatar>
       </div>
       <div class="user_text">
-        <a-typography-title :level="4">用户昵称</a-typography-title>
+        <a-typography-title :level="4">{{ loginUser.nickname }}</a-typography-title>
         <a-space :size="[0, 'small']" wrap>
           <a-tag :bordered="false">Tag 1</a-tag>
           <a-tag :bordered="false">Tag 2</a-tag>
@@ -68,27 +74,27 @@ let jumpToChangeMsg = ()=>{
               <a-typography-text>我的邮箱</a-typography-text>
             </div>
             <div class="text_container">
-              <a-typography-text style="font-size: 12px">绑定后即可使用邮箱登录</a-typography-text>
+              <a-typography-text style="font-size: 12px">{{ loginUser.email === null?'绑定后即可使用邮箱登录':loginUser.email }}</a-typography-text>
             </div>
-            <a-button size="small">绑定邮箱</a-button>
+            <a-button size="small"> {{ loginUser.email === null?'绑定邮箱':'更换邮箱' }}</a-button>
           </a-col>
           <a-col :span="12">
             <div class="text_container">
               <a-typography-text>我的手机</a-typography-text>
             </div>
             <div class="text_container">
-              <a-typography-text style="font-size: 12px">绑定后即可使用手机登录</a-typography-text>
+              <a-typography-text style="font-size: 12px">{{ loginUser.phone === null?'绑定后即可使用手机登录':loginUser.phone }}</a-typography-text>
             </div>
-            <a-button size="small">绑定手机</a-button>
+            <a-button size="small">{{ loginUser.phone === null?"绑定手机":"更换绑定" }}</a-button>
           </a-col>
           <a-col :span="12">
             <div class="text_container">
               <a-typography-text>我的密保</a-typography-text>
             </div>
             <div class="text_container">
-              <a-typography-text style="font-size: 12px">设置密保，账号更安全</a-typography-text>
+              <a-typography-text style="font-size: 12px">{{loginUser.safeQuestion===null?'设置密保，账号更安全':'已设置密保'}}</a-typography-text>
             </div>
-            <a-button size="small">设置密保</a-button>
+            <a-button size="small">{{loginUser.safeQuestion===null?"设置密保":"更换密保"}}</a-button>
           </a-col>
           <a-col :span="12">
             <div class="text_container">
