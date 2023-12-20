@@ -44,9 +44,14 @@ let operationSet = reactive([
     to:'/records'
   },
   {
+    name: '上传作品',
+    to:'/upload'
+  },
+  {
     name: '用户注销',
     to: '/revoked'
-  }])
+  },
+])
 
 emitter.on("changeSelected",(param)=>{
   // 通过mitt组件实现的全局事件总线，用于实现组件之间通信

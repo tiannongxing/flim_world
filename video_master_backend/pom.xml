@@ -94,6 +94,13 @@
             <version>0.12.3</version>
         </dependency>
 
+        <!-- 配置ftp服务向后台发送文件 -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>

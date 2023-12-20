@@ -26,6 +26,7 @@ spring:
 
 
 
+
   # 开发环境下，websocket线程池配置
   websocket:
     task:
@@ -50,6 +51,12 @@ spring:
           starttls:
             enable: true
             required: true
+  # 设置视频等文件的传输
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2GB
+      max-request-size: 3000MB
 
 
 
@@ -64,3 +71,11 @@ server:
     context-path: "/video-master"
     encoding:
       charset: UTF-8
+
+#其他配置信息
+store:
+  ftp:
+    host: "192.168.32.137"
+    port: 21
+    user: "dev01"
+    password: "opr416"

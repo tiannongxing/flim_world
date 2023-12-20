@@ -25,6 +25,9 @@
 }
 
 .container{
-    min-width: 1200px;
-    min-height: 960px;
+    padding: 1em;
+}
+
+.container-outer{
+    padding: 2em;
 }

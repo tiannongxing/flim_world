@@ -1,5 +1,6 @@
 package com.video_master.video_master_backend.util;
 
+import com.video_master.video_master_backend.exception.TokenObsoleteException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -30,10 +31,10 @@ public class JwtTokenUtil {
             return Jwts.parser().verifyWith(KEY).build().parseSignedClaims(token);
         } catch (SignatureException e) {
             // 无效的签名/密钥
-            throw new RuntimeException("秘钥无效");
+            throw new TokenObsoleteException("自动登录已失效");
         } catch (Exception e) {
-            // 其他异常处理
-            throw new RuntimeException("token匹配错误");
+            // 其他异常处理 目前将其他异常当做失效处理
+            throw new TokenObsoleteException("自动登录已失效");
         }
     }
 }

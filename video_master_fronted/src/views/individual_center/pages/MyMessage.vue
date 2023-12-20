@@ -1,30 +1,27 @@
 <script setup>
-import {computed, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import dayjs from "dayjs";
 import MapContainer from "../components/MapContainer.vue";
 import store from "../store/store.js";
 import {message} from "ant-design-vue";
-import {LoadingOutlined, PlusOutlined} from "@ant-design/icons-vue";
-import myUpload from 'vue-image-crop-upload';
+import {UploadOutlined } from "@ant-design/icons-vue";
+import AvatarUploader from "../components/AvatarUploader.vue";
+import { base64ToBlob } from '../utils/Base64ToBlobUtil.js'
 
-let userObj = ref({})
+let userObj = ref('')
 let ping = ref(new Date().toString())
-let loginUser = computed(() => {
+
+onMounted(()=>{
+  loadUser()
+})
+
+let loadUser = async ()=>{
   if (store.state.userState.user) {
     userObj.value = JSON.parse(JSON.stringify(store.state.userState.user))
-    return userObj.value
   } else {
     message.error("你没登录就进来了呢，真厉害！！")
   }
-})
-
-let avatarPath = computed(() => {
-  if (loginUser) {
-    return '/users/' + loginUser.value.img
-  } else {
-
-  }
-})
+}
 
 const gender = ref("man")
 const dateFormat = 'YYYY-MM-DD';
@@ -66,63 +63,52 @@ const options = [
 const value = ref([]);
 
 const open = ref(false);
+const uploadAvatarOpen = ref(false)
 const showModal = () => {
   open.value = true
 };
 const handleOk = e => {
   ping.value = new Date().toString()
 };
-
+const avaterHandleOk = e => {
+  pingAvatar.value=new Date().toString()
+}
 const putLocationHandler = (e) => {
   userObj.value.location = e.selectedAddress
   open.value = false
 }
-
-// 上传图片相关
-let show = ref(false)
-let toggleShow = ()=>{
-  show.value = !show.value
+const showUploadAvatarModal = () => {
+  uploadAvatarOpen.value = true
 }
-let params = ref({
-  token: localStorage.getItem("token"),
-  name: 'avatar'
+const pingAvatar = ref("")
+
+let emitAvatarHandler = (e)=>{
+  userObj.value.img = e.value
+  uploadAvatarOpen.value = false
+}
+
+let availableImg = computed(()=>{
+  if (userObj.value.img === '' || userObj.value === ''){
+    return '/static/unlogin.png'
+  }
+  else if (userObj.value.img.indexOf('data:image') === -1){
+    return '/users/'+userObj.value.img
+  }else{
+    return userObj.value.img
+  }
 })
 
-let headers= ref({
-  smail: '*_~'
-})
-let imgDataUrl= ref('') // 创建的base64格式的图片
-/**
- * crop success
- *
- * [param] imgDataUrl
- * [param] field
- */
-let cropSuccess = (imgDataUrl, field)=>{
-  console.log('-------- crop success --------');
-  this.imgDataUrl = imgDataUrl;
-}
-/**
- * upload success
- *
- * [param] jsonData   服务器返回数据，已进行json转码
- * [param] field
- */
-let cropUploadSuccess = (jsonData, field)=>{
-  console.log('-------- upload success --------');
-  console.log(jsonData);
-  console.log('field: ' + field);
-}
-/**
- * upload fail
- *
- * [param] status    server api return error status, like 500
- * [param] field
- */
-let cropUploadFail = (status, field)=>{
-  console.log('-------- upload fail --------');
-  console.log(status);
-  console.log('field: ' + field);
+const userModify = ()=>{
+  if (userObj.value.img.indexOf('data:image') !== -1){
+    // 涉及到头像修改，采取MultipartFile 的方式发送请求
+    console.log(userObj.value.img)
+    let blob = base64ToBlob(userObj.value.img.split(',')[1],"image/png");
+    let formData = new FormData();
+    formData.append("image",blob,`avatar_${Date.now()}.png`)
+    console.log(formData)
+  }else{
+    // 不涉及头像修改，采用传统json方式
+  }
 }
 </script>
 
@@ -137,22 +123,18 @@ let cropUploadFail = (status, field)=>{
           <a-typography-text>头像</a-typography-text>
         </a-col>
         <a-col :span="20" style="position:relative;">
-          <a-avatar :size="{ xs: 16, sm: 24, md: 32, lg: 52, xl: 64, xxl: 80 }" :src="avatarPath">
+          <a-avatar :size="{ xs: 16, sm: 24, md: 32, lg: 52, xl: 64, xxl: 80 }" :src="availableImg">
           </a-avatar>
           <!-- 图片上传部分 -->
-            <a class="btn" style="margin-left: 2em" @click="toggleShow">设置头像</a>
-            <my-upload field="img"
-                       @crop-success="cropSuccess"
-                       @crop-upload-success="cropUploadSuccess"
-                       @crop-upload-fail="cropUploadFail"
-                       v-model="show"
-                       :width="300"
-                       :height="300"
-                       url="/upload"
-                       :params="params"
-                       :headers="headers"
-                       img-format="png"></my-upload>
-            <img :src="imgDataUrl">
+          <div class="upload-wrapper">
+            <a-button type="default" class="upload-btn" @click="showUploadAvatarModal">
+              <template #icon>
+                <UploadOutlined/>
+                上传头像
+              </template>
+            </a-button>
+          </div>
+
         </a-col>
         <a-col :span="4">
           <a-typography-text>昵称</a-typography-text>
@@ -220,6 +202,7 @@ let cropUploadFail = (status, field)=>{
           <a-button type="link" size="small" @click="showModal">定位</a-button>
         </a-col>
       </a-row>
+      <!-- 选择地址模态窗口 -->
       <a-modal
           v-model:open="open"
           title="定位"
@@ -231,9 +214,19 @@ let cropUploadFail = (status, field)=>{
       >
         <map-container :ping="ping" @putLocation="putLocationHandler"></map-container>
       </a-modal>
+      <!-- 上传头像模态窗口 -->
+      <a-modal
+          v-model:open="uploadAvatarOpen"
+          title="上传头像"
+          @ok="avaterHandleOk"
+          ok-text="确认头像"
+          cancel-text="取消"
+      >
+        <avatar-uploader :ping="pingAvatar" @emitAvatar="emitAvatarHandler"></avatar-uploader>
+      </a-modal>
     </div>
 
-    <a-button type="primary" style="margin-top: 1em">
+    <a-button type="primary" style="margin-top: 1em" @click="userModify">
       修改资料
     </a-button>
   </div>
@@ -250,11 +243,19 @@ let cropUploadFail = (status, field)=>{
   width: 33%;
 }
 
-.upload-wrapper{
+.upload-wrapper {
+  display: inline-block;
+  position: relative;
+  width: auto;
+  height: auto;
+}
+
+.upload-btn {
   display: inline-block;
   position: absolute;
-  left: 10em;
-  top: 50%;
+  left: 2em;
+  padding: 5px;
+  width: auto;
   transform: translateY(-50%);
 }
 </style>
@@ -277,10 +278,12 @@ let cropUploadFail = (status, field)=>{
     flex: 1;
   }
 }
+
 .avatar-uploader > .ant-upload {
   width: inherit;
   height: inherit;
 }
+
 .ant-upload-select-picture-card i {
   font-size: 32px;
   color: #999;

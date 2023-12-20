@@ -4,6 +4,7 @@ import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -37,5 +38,7 @@ public interface VideoServices {
     Integer getAllVideosLikeName(Map<String,String> params);
 
     VideoPlayerVo getPlayerVideoByIdAndCurrentEpisode(Integer id, Integer currentEpisode);
+
+    Boolean writeFileToDisk(MultipartFile ...files);
 
 }

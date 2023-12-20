@@ -1,6 +1,7 @@
 package com.video_master.video_master_backend.config;
 
 import com.video_master.video_master_backend.exception.PasswordMismatchException;
+import com.video_master.video_master_backend.exception.TokenObsoleteException;
 import com.video_master.video_master_backend.exception.UserNotFountException;
 import com.video_master.video_master_backend.util.JackonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,15 @@ public class GlobalExceptionHandler {
     public List<String> exceptionHandler(UserNotFountException unfe) {
         List<String> errorMessage = new ArrayList<>();
         errorMessage.add(unfe.getMessage());
+        return errorMessage;
+    }
+
+    @ExceptionHandler(TokenObsoleteException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public List<String> exceptionHandler(TokenObsoleteException toe) {
+        List<String> errorMessage = new ArrayList<>();
+        errorMessage.add(toe.getMessage());
         return errorMessage;
     }
 }

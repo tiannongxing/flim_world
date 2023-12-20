@@ -34,7 +34,11 @@ const routes = [
         path:'/security_check',
         name:'security_check',
         component: ()=>import("../pages/SecurityCheck.vue"),
-
+    },
+    {
+        path:'/upload',
+        name:'/upload',
+        component: ()=>import("../pages/VideoUpload.vue")
     }
 ]
 

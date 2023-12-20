@@ -5,18 +5,24 @@ import com.video_master.video_master_backend.model.dto.VideoListsDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedListDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
-import com.video_master.video_master_backend.services.VideoServices;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
 import com.video_master.video_master_backend.model.vo.VideoVo;
+import com.video_master.video_master_backend.services.VideoServices;
 import com.video_master.video_master_backend.util.JackonUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -25,6 +31,8 @@ import java.util.*;
 public class ResourceController {
     @Resource
     private VideoServices videoServices;
+
+
 
     @GetMapping("/getByName")
     public String getVideoData(@RequestParam String name) {
@@ -47,7 +55,6 @@ public class ResourceController {
     }
 
 
-
     @GetMapping("/getMovieDetailById")
     public String getMovieDetailById(@RequestParam Integer mid) {
         // 通过id查找影片信息，返回影片的json格式字符串
@@ -57,7 +64,7 @@ public class ResourceController {
     }
 
     @GetMapping("/getVideos")
-    public String getVideos(@RequestParam Map<String,String> params){
+    public String getVideos(@RequestParam Map<String, String> params) {
         // 直接传入params，根据params里的key 做筛选
         List<VideoEntity> videos = videoServices.getVideos(params);
 
@@ -71,7 +78,7 @@ public class ResourceController {
     }
 
     @GetMapping("/getMoviesLikeName")
-    public String getMoviesLikeName(@RequestParam Map<String,String> params) {
+    public String getMoviesLikeName(@RequestParam Map<String, String> params) {
         List<VideoSearchedDTO> searchedVideoLikeName = videoServices.getSearchedVideoLikeName(params);
         VideoSearchedListDTO videoSearchedListDTO = VideoSearchedListDTO.builder()
                 .videoList(searchedVideoLikeName)
@@ -84,9 +91,21 @@ public class ResourceController {
 
 
     @GetMapping("/getPlayingCorrect")
-    public String getPlayingCorrect(@RequestParam Map<String,String> params){
+    public String getPlayingCorrect(@RequestParam Map<String, String> params) {
         List<String> paramList = params.values().stream().toList();
-        VideoPlayerVo playerVideo = videoServices.getPlayerVideoByIdAndCurrentEpisode(Integer.parseInt(paramList.get(0)),Integer.parseInt(paramList.get(1)));
+        VideoPlayerVo playerVideo = videoServices.getPlayerVideoByIdAndCurrentEpisode(Integer.parseInt(paramList.get(0)), Integer.parseInt(paramList.get(1)));
         return JackonUtil.ObjectToJSON(playerVideo);
     }
+
+    @PostMapping("/videoUpload")
+    public Boolean videoUpload(@RequestPart("video") MultipartFile video,
+                              @RequestPart("image") MultipartFile image) throws IOException {
+
+        log.info("接收到的影片资料为:{},图片资料为:{}",video.getOriginalFilename(),image.getOriginalFilename());
+        log.info("接收到的影片格式为:{},图片格式为:{}",video.getContentType(),image.getContentType());
+
+
+        return videoServices.writeFileToDisk(video,image);
+    }
+
 }

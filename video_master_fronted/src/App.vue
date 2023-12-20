@@ -25,7 +25,11 @@ onMounted(()=>{
         }
     ).catch(
         (err)=>{
-          message.error(`发生错误： ${err}`)
+          if (err.response.status === 400){
+            // 后台系统检测到token过时，返回一个警告信息
+            message.warning(`警告：${err.response.data}`)
+            localStorage.removeItem('token')
+          }
         }
     )
   }
