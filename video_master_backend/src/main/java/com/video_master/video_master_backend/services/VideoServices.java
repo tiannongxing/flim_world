@@ -3,6 +3,7 @@ package com.video_master.video_master_backend.services;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
+import com.video_master.video_master_backend.model.vo.VideoCategoryVo;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,5 +41,9 @@ public interface VideoServices {
     VideoPlayerVo getPlayerVideoByIdAndCurrentEpisode(Integer id, Integer currentEpisode);
 
     Boolean writeFileToDisk(MultipartFile ...files);
+
+    VideoCategoryVo getVideoCategory();
+
+    List<String> getLocations();
 
 }

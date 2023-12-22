@@ -18,7 +18,11 @@ public interface UserServices {
     Map<String,UserEntity> UserCertificationByMail(UserLoginByMailVo vo);
 
     Map<String,UserEntity> UserCertificationByToken(String token);
-    UserEntity getUserById(Long id);
+    UserEntity getUserById(String id);
 
-    void userExit(Long id);
+    UserEntity updateUserById(String id);
+
+    void userExit(String id);
+
+    Integer userUpdate(UserEntity user);
 }

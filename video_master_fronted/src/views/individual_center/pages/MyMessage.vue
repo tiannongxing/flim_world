@@ -1,21 +1,26 @@
 <script setup>
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref} from "vue";
 import dayjs from "dayjs";
 import MapContainer from "../components/MapContainer.vue";
 import store from "../store/store.js";
 import {message} from "ant-design-vue";
-import {UploadOutlined } from "@ant-design/icons-vue";
+import {UploadOutlined} from "@ant-design/icons-vue";
 import AvatarUploader from "../components/AvatarUploader.vue";
-import { base64ToBlob } from '../utils/Base64ToBlobUtil.js'
+import axios from "axios";
+import zhCN from 'ant-design-vue/es/locale/zh_CN';
+import 'moment/locale/zh-cn.js'
+import moment from "moment";
 
+moment.locale("zh-cn")
 let userObj = ref('')
 let ping = ref(new Date().toString())
 
-onMounted(()=>{
+onMounted(() => {
   loadUser()
+  dayjs.locale("zh-cn")
 })
 
-let loadUser = async ()=>{
+let loadUser = async () => {
   if (store.state.userState.user) {
     userObj.value = JSON.parse(JSON.stringify(store.state.userState.user))
   } else {
@@ -71,7 +76,7 @@ const handleOk = e => {
   ping.value = new Date().toString()
 };
 const avaterHandleOk = e => {
-  pingAvatar.value=new Date().toString()
+  pingAvatar.value = new Date().toString()
 }
 const putLocationHandler = (e) => {
   userObj.value.location = e.selectedAddress
@@ -82,33 +87,50 @@ const showUploadAvatarModal = () => {
 }
 const pingAvatar = ref("")
 
-let emitAvatarHandler = (e)=>{
+let emitAvatarHandler = (e) => {
   userObj.value.img = e.value
   uploadAvatarOpen.value = false
 }
 
-let availableImg = computed(()=>{
-  if (userObj.value.img === '' || userObj.value === ''){
+let availableImg = computed(() => {
+  if (userObj.value.img === '' || userObj.value === '') {
     return '/static/unlogin.png'
-  }
-  else if (userObj.value.img.indexOf('data:image') === -1){
-    return '/users/'+userObj.value.img
-  }else{
+  } else if (userObj.value.img.indexOf('data:image') === -1) {
+    return '/users/' + userObj.value.img
+  } else {
     return userObj.value.img
   }
 })
 
-const userModify = ()=>{
-  if (userObj.value.img.indexOf('data:image') !== -1){
-    // 涉及到头像修改，采取MultipartFile 的方式发送请求
-    console.log(userObj.value.img)
-    let blob = base64ToBlob(userObj.value.img.split(',')[1],"image/png");
-    let formData = new FormData();
-    formData.append("image",blob,`avatar_${Date.now()}.png`)
-    console.log(formData)
-  }else{
-    // 不涉及头像修改，采用传统json方式
+const userModify = () => {
+  console.log(userObj.value.id)
+  // 将base64转码成安全的格式
+  if (userObj.value.img.indexOf("data:image") !== -1) {
+    userObj.value.img = userObj.value.img.replace("+", "-").replace("/", "_");
   }
+  axios.post("/video-master/users/update_user", userObj.value)
+      .then((res) => {
+        if (res.data !== null) {
+          userObj.value = res.data
+          console.log(res.data)
+          // 更新仓库中的数据
+          store.dispatch("updateUserState", {
+            isLogin: true,
+            user: res.data
+          })
+          message.success("更新用户信息成功")
+        }
+      })
+      .catch((err) => {
+        if (err.response.status >= 500 && err.response.status < 600) {
+          message.error("服务器出现问题，请及时联系管理员")
+        } else if (err.response.status >= 400 && err.response.status < 500) {
+          message.error(`错误信息：${err.response.data}`)
+        } else {
+          message.warning(`其他错误：${err}请及时将错误信息告知管理员`)
+        }
+
+      })
 }
 </script>
 
@@ -153,16 +175,19 @@ const userModify = ()=>{
         <a-col :span="4">性别</a-col>
         <a-col :span="20">
           <a-radio-group v-model:value="userObj.sex" button-style="solid" @change="console.log(gender)" size="small">
-            <a-radio-button value="man">男</a-radio-button>
-            <a-radio-button value="male">女</a-radio-button>
-            <a-radio-button value="other">其他</a-radio-button>
+            <a-radio-button value="男">男</a-radio-button>
+            <a-radio-button value="女">女</a-radio-button>
+            <a-radio-button value="其他">其他</a-radio-button>
           </a-radio-group>
         </a-col>
 
         <a-col :span="4">出生日期</a-col>
         <a-col :span="20">
-          <a-date-picker size="small" v-model:value="userObj.birthday" :value-format="dateFormat" :format="dateFormat"
-                         placeholder="选择日期"/>
+          <a-config-provider :locale="zhCN">
+            <a-date-picker size="small" autofocus v-model:value="userObj.birthday" :value-format="dateFormat"
+                           :format="dateFormat"
+                           placeholder="选择日期"/>
+          </a-config-provider>
         </a-col>
 
 

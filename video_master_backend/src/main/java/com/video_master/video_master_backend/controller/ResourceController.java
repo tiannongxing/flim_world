@@ -5,6 +5,7 @@ import com.video_master.video_master_backend.model.dto.VideoListsDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedListDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
+import com.video_master.video_master_backend.model.vo.VideoCategoryVo;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
 import com.video_master.video_master_backend.model.vo.VideoVo;
 import com.video_master.video_master_backend.services.VideoServices;
@@ -101,11 +102,17 @@ public class ResourceController {
     public Boolean videoUpload(@RequestPart("video") MultipartFile video,
                               @RequestPart("image") MultipartFile image) throws IOException {
 
-        log.info("接收到的影片资料为:{},图片资料为:{}",video.getOriginalFilename(),image.getOriginalFilename());
-        log.info("接收到的影片格式为:{},图片格式为:{}",video.getContentType(),image.getContentType());
-
-
         return videoServices.writeFileToDisk(video,image);
     }
 
+    @GetMapping("/getVideoCategory")
+    VideoCategoryVo getVideoCategory(){
+        VideoCategoryVo videoCategory = videoServices.getVideoCategory();
+        return videoCategory;
+    }
+
+    @GetMapping("/getAllLocations")
+    List<String> getAllLocations(){
+        return videoServices.getLocations();
+    }
 }

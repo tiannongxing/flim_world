@@ -1,10 +1,13 @@
 package com.video_master.video_master_backend.services.impl;
 
 import com.video_master.video_master_backend.mapper.VideoMapper;
+import com.video_master.video_master_backend.model.dto.VideoCategoryDTO;
 import com.video_master.video_master_backend.model.dto.VideoPlayerDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
+import com.video_master.video_master_backend.model.entity.VideoCategoryEntity;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
+import com.video_master.video_master_backend.model.vo.VideoCategoryVo;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
 import com.video_master.video_master_backend.services.VideoServices;
 import com.video_master.video_master_backend.util.FtpUtil;
@@ -18,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -146,6 +150,19 @@ public class VideoServicesImpl implements VideoServices {
 
 
         return success.get();
+    }
+
+    @Override
+    public VideoCategoryVo getVideoCategory() {
+        List<VideoCategoryEntity> videoCategoryList = videoMapper.getVideoCategoryList();
+        VideoCategoryVo videoCategoryVo = VideoCategoryDTO.entityToVo(videoCategoryList);
+
+        return videoCategoryVo;
+    }
+
+    @Override
+    public List<String> getLocations() {
+        return videoMapper.getAllLocation();
     }
 }
 

@@ -13,7 +13,6 @@ public class FtpUtil {
     public static boolean uploadFile(String server, int port, String user, String password,
                               String remoteFilePath, InputStream fileStream) throws IOException {
 
-        log.info("地址:{},用户:{},密码:{},地址:{}",server,user,password,remoteFilePath);
         FTPClient ftpClient = new FTPClient();
         try {
             ftpClient.connect(server, port);

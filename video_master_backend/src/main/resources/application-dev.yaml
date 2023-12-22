@@ -1,12 +1,13 @@
 #开发配置文件
 
 spring:
-  #配置mysql数据库 关系型数据库
+  #配置mysql数据库 关系型数据库 并设置事务自动提交
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/vedio-master?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/vedio-master?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&autoCommit=true
     username: root
     password: opr416
+
 
   data:
     #配置redis数据库 非关系型数据库

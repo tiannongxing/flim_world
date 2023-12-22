@@ -17,7 +17,7 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 @Builder
 public class UserRegisterDTO {
-    private Long id;
+    private String id;
     @NotBlank(message = "用户名不得为空")
     @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9_]{5,15}$", message = "用户名必须以字母开头，且在6-16个字之间")
     private String username;
@@ -31,7 +31,7 @@ public class UserRegisterDTO {
     @Validated
     public static UserRegisterDTO VoToDto(UserRegisterVo vo) {
         return UserRegisterDTO.builder()
-                .id(new SnowFlake(1l, 1l).nextId())
+                .id(String.valueOf(new SnowFlake(1l, 1l).nextId()))
                 .nickname(vo.getNickname())
                 .password(vo.getPassword())
                 .username(vo.getUsername())

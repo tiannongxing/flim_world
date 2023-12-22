@@ -69,17 +69,27 @@ public class UserController {
     @GetMapping("/login/token")
     UserEntity loginByToken(@RequestParam("token") String token) {
         Jws<Claims> claimsJws = JwtTokenUtil.checkToken(token);
-        Long uid = Long.parseLong(claimsJws.getPayload().getSubject());
+        String uid = claimsJws.getPayload().getSubject();
         log.info(String.valueOf(uid));
         UserEntity userById = userServices.getUserById(uid);
         return userById;
     }
 
     @GetMapping("/logout")
-    void userLogout(@RequestParam("id") Long id){
+    void userLogout(@RequestParam("id") String id){
         if(!Objects.equals(id,null)){ // 确保传入的id值不为空
             userServices.userExit(id);
         }
+    }
+
+    @PostMapping("/update_user")
+    UserEntity updateUser(@RequestBody @Valid UserEntity user){
+        Integer integer = userServices.userUpdate(user);
+        UserEntity userEntity = new UserEntity();
+        if (integer > 0){
+            userEntity = userServices.updateUserById(user.getId());
+        }
+        return userEntity;
     }
 
 }

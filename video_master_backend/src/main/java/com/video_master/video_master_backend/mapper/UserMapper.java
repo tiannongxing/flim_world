@@ -2,10 +2,8 @@ package com.video_master.video_master_backend.mapper;
 
 import com.video_master.video_master_backend.model.entity.UserEntity;
 import com.video_master.video_master_backend.model.entity.UserRegisterEntity;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import com.video_master.video_master_backend.util.DynaSQLProviderBuilder;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 @Mapper
@@ -25,5 +23,11 @@ public interface UserMapper {
     @Select("""
             select * from user where id = #{id}
             """)
-    UserEntity selectUserExistById(@Param("id") Long id);
+    UserEntity selectUserExistById(@Param("id") String id);
+
+    @UpdateProvider(type = DynaSQLProviderBuilder.class,method = "updateUser")
+    Integer updateUser(@Param("user") UserEntity user);
+
+    @UpdateProvider(type = DynaSQLProviderBuilder.class,method = "updateUserPlusAvatar")
+    Integer updateUserPlusAvatar(@Param("user") UserEntity user,@Param("avatar") String path);
 }

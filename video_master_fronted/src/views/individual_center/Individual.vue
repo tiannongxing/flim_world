@@ -5,8 +5,13 @@ import emitter from "../../utils/EventBus.js";
 import {getMessageSender} from "../../utils/MessageSender.js";
 import MessageObj from "../../utils/messageObj.js";
 import {message} from "ant-design-vue";
-import {PoweroffOutlined} from "@ant-design/icons-vue";
+import {PoweroffOutlined,LogoutOutlined} from "@ant-design/icons-vue";
 import store from "./store/store.js";
+import zhCN from 'ant-design-vue/es/locale/zh_CN';
+import 'moment/locale/zh-cn.js'
+import moment from "moment";
+import {useRoute, useRouter} from "vue-router";
+moment.locale("zh-cn")
 
 const onCollapse = (collapsed, type) => {
 
@@ -15,12 +20,12 @@ const onBreakpoint = broken => {
 
 };
 const selectedKeys = ref([0]);
-let pushToTargetPage = (page,...msg)=>{
-  if(msg.length === 0)
+let pushToTargetPage = (page, ...msg) => {
+  if (msg.length === 0)
     router.push({path: page})
-  else{
+  else {
     let sets = JSON.stringify(msg)
-    router.push({path: page,query: {params:sets}})
+    router.push({path: page, query: {params: sets}})
   }
 }
 const animate_list = ref(['user_display_show', 'user_display_hidden'])
@@ -29,11 +34,11 @@ let intViewportHeight = ref(document.documentElement.clientHeight);
 let operationSet = reactive([
   {
     name: '首页',
-    to : '/home'
+    to: '/home'
   },
   {
     name: '我的信息',
-    to : '/message'
+    to: '/message'
   },
   {
     name: '账号安全',
@@ -41,11 +46,11 @@ let operationSet = reactive([
   },
   {
     name: '我的记录',
-    to:'/records'
+    to: '/records'
   },
   {
     name: '上传作品',
-    to:'/upload'
+    to: '/upload'
   },
   {
     name: '用户注销',
@@ -53,34 +58,33 @@ let operationSet = reactive([
   },
 ])
 
-emitter.on("changeSelected",(param)=>{
+emitter.on("changeSelected", (param) => {
   // 通过mitt组件实现的全局事件总线，用于实现组件之间通信
   selectedKeys.value = [param.changeTo]
 })
 
 
-
-onBeforeUnmount(()=>{
+onBeforeUnmount(() => {
   // 在页面跳转前，结束挂载事件
   emitter.off("changeSelected")
 })
 
-onMounted(()=>{
+onMounted(() => {
   // localStorage.removeItem("token")
   let token = localStorage.getItem("token")
-  if(token){
+  if (token) {
     // 如果token存在，则向后端发送请求，获取数据
-    let promise = getMessageSender("/video-master/users/login/token",new MessageObj("token",localStorage.getItem("token")).getObject())
+    let promise = getMessageSender("/video-master/users/login/token", new MessageObj("token", localStorage.getItem("token")).getObject())
     promise.then(
-        (res)=>{
+        (res) => {
           // 对于环境比较复杂的需要用于全局的信息，使用vuex，依赖注入无法处理这种状况
-          store.dispatch("updateUserState",{
+          store.dispatch("updateUserState", {
             isLogin: true,
             user: res.data
           })
         }
     ).catch(
-        (err)=>{
+        (err) => {
           message.error(`发生错误： ${err}`)
         }
     )
@@ -89,54 +93,64 @@ onMounted(()=>{
   router.push("/home")
 })
 
-const avatarPath = computed(()=>{
-  return "/users/"+store.state.userState.user.img
+const avatarPath = computed(() => {
+  return "/users/" + store.state.userState.user.img
 })
+
+const returnIndex = ()=>{
+  window.location.href = '/'
+}
 </script>
 
 <template>
-  <div class="container">
-    <a-layout :style="{height : intViewportHeight+'px'}">
-      <a-layout-sider
-          breakpoint="lg"
-          collapsed-width="0"
-          @collapse="onCollapse"
-          @breakpoint="onBreakpoint"
-      >
-        <div class="logo user_select_forbidden">
-          <a-typography-title style="color: #5FB878" :level="3">个人中心</a-typography-title>
-        </div>
-        <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
-          <a-menu-item v-for="(operation,index) in operationSet" :key="index" @click="pushToTargetPage(operation.to)">
-            <span class="nav-text">{{ operation.name }}</span>
-          </a-menu-item>
-        </a-menu>
-      </a-layout-sider>
-      <a-layout>
-        <a-layout-header :style="{ background: '#fff', padding: 0 , position:'relative', zIndex:4}">
-          <div class="avatar-wrapper" @mouseenter="selectAnimate=animate_list[0]" @mouseleave="selectAnimate=animate_list[1]">
-            <a-avatar :size="32" class="avatar" wrap :src="avatarPath">
-            </a-avatar>
-            <div class="operator-wrapper" :class="selectAnimate">
-              <a-button class="align-left"  type="text" size="large" @click="" block>
-                <span><PoweroffOutlined/> 退出登录</span>
-              </a-button>
+  <a-config-provider :locale="zhCN">
+    <div class="container">
+      <a-layout :style="{height : intViewportHeight+'px'}">
+        <a-layout-sider
+            breakpoint="lg"
+            collapsed-width="0"
+            @collapse="onCollapse"
+            @breakpoint="onBreakpoint"
+        >
+          <div class="logo user_select_forbidden">
+            <a-typography-title style="color: #5FB878" :level="3">个人中心</a-typography-title>
+          </div>
+          <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
+            <a-menu-item v-for="(operation,index) in operationSet" :key="index" @click="pushToTargetPage(operation.to)">
+              <span class="nav-text">{{ operation.name }}</span>
+            </a-menu-item>
+          </a-menu>
+        </a-layout-sider>
+        <a-layout>
+          <a-layout-header :style="{ background: '#fff', padding: 0 , position:'relative', zIndex:4}">
+            <div class="avatar-wrapper" @mouseenter="selectAnimate=animate_list[0]"
+                 @mouseleave="selectAnimate=animate_list[1]">
+              <a-avatar :size="32" class="avatar" wrap :src="avatarPath">
+              </a-avatar>
+              <div class="operator-wrapper" :class="selectAnimate">
+                <a-button type="text" size="large" @click="" block>
+                  <span><PoweroffOutlined/> 退出登录</span>
+                </a-button>
+                <a-button type="text" size="large" @click="returnIndex" block>
+                  <span><LogoutOutlined /> 返回主页</span>
+                </a-button>
+              </div>
             </div>
-          </div>
 
-        </a-layout-header>
-        <a-layout-content :style="{ margin: '24px 16px 0' }">
-          <div :style="{ padding: '24px', background: '#fff', minHeight: `calc(${intViewportHeight}px - 10em)`,
-         height: 'auto !important'}">
-            <router-view></router-view>
-          </div>
-        </a-layout-content>
-        <a-layout-footer style="text-align: center">
-          Ant Design ©2018 Created by Ant UED
-        </a-layout-footer>
+          </a-layout-header>
+          <a-layout-content :style="{ margin: '24px 16px 0' }">
+            <div :style="{ padding: '24px', background: '#fff',
+            height: 'auto'}">
+              <router-view :key="useRoute().fullPath"></router-view>
+            </div>
+          </a-layout-content>
+          <a-layout-footer style="text-align: center">
+            Ant Design ©2018 Created by Ant UED
+          </a-layout-footer>
+        </a-layout>
       </a-layout>
-    </a-layout>
-  </div>
+    </div>
+  </a-config-provider>
 </template>
 
 <style scoped>
@@ -167,7 +181,7 @@ const avatarPath = computed(()=>{
   margin-top: 1em;
 }
 
-.avatar-wrapper{
+.avatar-wrapper {
   display: inline-block;
   position: absolute;
   right: calc(7vw);
@@ -177,7 +191,7 @@ const avatarPath = computed(()=>{
   height: auto;
 }
 
-.operator-wrapper{
+.operator-wrapper {
   display: inline-block;
   position: absolute;
   background: white;
@@ -192,7 +206,7 @@ const avatarPath = computed(()=>{
   opacity: 0;
 }
 
-.avatar{
+.avatar {
   position: relative;
   z-index: 999;
 }
@@ -210,5 +224,7 @@ const avatarPath = computed(()=>{
   visibility: hidden !important;
   opacity: 0;
 }
+.operator-wrapper :deep(.ant-btn){
 
+}
 </style>

@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserRegisterEntity {
-    private String id;
-    private String username;
-    private String password;
-    private String nickname;
+public class VideoCategoryEntity {
+    private String pid;
+    private String category;
 }
