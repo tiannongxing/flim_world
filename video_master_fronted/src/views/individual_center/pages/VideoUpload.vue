@@ -12,7 +12,7 @@ const dateFormat = 'YYYY-MM-DD';
 const uploadData = reactive({
   video: [],
   videoData: {
-    videName: '',
+    videoName: '',
     currentEpisode: '',
     totalEpisode: '',
     starring: '',
@@ -84,6 +84,7 @@ const submit = () => {
     const blob = new Blob([video], {type: video.type})
     formData.append('video', blob, `video_${Date.now()}.${suffix}`)
   })
+  formData.append("jsonData",JSON.stringify(uploadData.videoData))
 
   // 使用axios请求发送
   axios.post("/video-master/resource/videoUpload", formData
@@ -134,6 +135,7 @@ onBeforeMount(async () => {
 
   axios.get("/video-master/resource/getAllLocations")
       .then((res) => {
+        console.log(res.data)
         let received = res.data;
         received = received.map(item => {
           return{
@@ -146,8 +148,6 @@ onBeforeMount(async () => {
       .catch(() => {
 
       })
-
-  console.log(videoLocations, videoType)
 })
 </script>
 
@@ -198,9 +198,9 @@ onBeforeMount(async () => {
       <a-col :span="12">
         <div class="wrapper-unit">
           <a-typography-text>视频名称</a-typography-text>
-          <a-input placeholder="请输入视频名称"></a-input>
+          <a-input placeholder="请输入视频名称" v-model:value="uploadData.videoData.videoName"></a-input>
         </div>
-        <div class="type-selector">
+        <div class="wrapper-unit">
           <a-typography-text>视频类型</a-typography-text>
           <br>
           <a-select
@@ -219,7 +219,7 @@ onBeforeMount(async () => {
               @popupScroll="popupScroll"
           ></a-select>
         </div>
-        <div>
+        <div class="wrapper-unit">
           <a-typography-text>视频集数</a-typography-text>
           <br>
           <a-typography-text>当前</a-typography-text>
@@ -232,7 +232,7 @@ onBeforeMount(async () => {
         </div>
         <div class="wrapper-unit">
           <a-typography-text>主演</a-typography-text>
-          <a-input placeholder="请输入主演姓名，不同主演之前请用‘,’连接"></a-input>
+          <a-input placeholder="请输入主演姓名，不同主演之前请用‘,’连接" v-model:value="uploadData.videoData.starring"></a-input>
         </div>
       </a-col>
       <a-col :span="12">
@@ -258,13 +258,13 @@ onBeforeMount(async () => {
         </div>
         <div class="wrapper-unit">
           <a-typography-text>视频介绍</a-typography-text>
-          <a-textarea placeholder="请输入视频介绍"></a-textarea>
+          <a-textarea placeholder="请输入视频介绍" v-model:value="uploadData.videoData.description"></a-textarea>
         </div>
       </a-col>
     </a-row>
 
 
-    <div class="submit-wrapper">
+    <div class="wrapper-unit">
       <a-button type="primary" @click="submit">提交</a-button>
     </div>
   </div>
@@ -281,15 +281,9 @@ onBeforeMount(async () => {
   color: #666;
 }
 
-.type-selector {
-  margin-top: 1em;
-}
-
-.submit-wrapper {
-  margin-top: 1em;
-}
 
 .wrapper-unit {
+  margin-top: 0.5em;
   width: 30em;
 }
 </style>

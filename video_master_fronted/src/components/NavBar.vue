@@ -157,18 +157,20 @@ const handleLoginOk = (modelName, successText, errorText) => {
     let params = []
     let tar = ""
     if (rec.type === "pass") {
-      for (let key in rec.data) {
-        params.push(new messageObj(key, rec[key]).getObject())
+      for (let key in rec.pass_msg) {
+        params.push(new messageObj(key, rec.pass_msg[key]).getObject())
       }
       tar = "/password"
 
-    } else if (rec.type === "mail") {
-      for (let key in rec.data) {
-        params.push(new messageObj(key, rec[key]).getObject())
+    } else if (rec.type === "email") {
+      console.log(rec.mail_msg)
+      for (let key in rec.mail_msg) {
+        console.log(key)
+        params.push(new messageObj(key, rec.mail_msg[key]).getObject())
       }
       tar = "/mail"
     }
-
+    console.log(params)
     let postMessage = postMessageSender(
         model_corresponds_path[modelName] + tar
         , ...params

@@ -75,8 +75,22 @@ public class UserServicesImpl implements UserServices {
     }
 
     @Override
-    public Map<String,UserEntity> UserCertificationByMail(UserLoginByMailVo vo) {
-        return null;
+    public Map<String,Object> UserCertificationByMail(UserLoginByMailVo vo) {
+        String s = (String) redisTemplate.opsForValue().get(vo.getEmail());
+        UserEntity userEntity = userMapper.selectUserExistByMail(vo.getEmail());
+        if(!Objects.equals(s,vo.getCode())) {
+            throw new PasswordMismatchException("验证码错误");
+        }
+        if (Objects.equals(userEntity,null)){
+            throw new UserNotFountException("邮箱代表用户不存在");
+        }
+
+        // 生成一个token 再将token返回到前端，前端将token存储在localstorage中
+        String token = JwtTokenUtil.generateToken(Long.valueOf(userEntity.getId()));
+        Map<String,Object> map = new HashMap();
+        map.put("token",token);
+        map.put("data",userEntity);
+        return map;
     }
 
     @Override

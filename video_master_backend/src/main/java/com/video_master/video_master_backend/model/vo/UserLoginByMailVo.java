@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserLoginByMailVo {
     @Pattern(regexp = "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$",message = "邮箱格式不正确")
-    private String mail;
+    private String email;
     @NotBlank(message = "验证码不能为空")
-    private String captcha;
+    private String code;
+
 }

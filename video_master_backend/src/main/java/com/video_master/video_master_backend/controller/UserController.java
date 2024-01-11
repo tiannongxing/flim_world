@@ -55,8 +55,10 @@ public class UserController {
     }
 
     @PostMapping("/login/mail")
-    Boolean loginByMail(@RequestBody @Valid UserLoginByMailVo vo) {
-        return true;
+    String loginByMail(@RequestBody @Valid UserLoginByMailVo vo) {
+        Map<String, Object> stringUserEntityMap = userServices.UserCertificationByMail(vo);
+        String mapString = JackonUtil.MapToJson(stringUserEntityMap);
+        return mapString;
     }
 
     @PostMapping("/login/password")

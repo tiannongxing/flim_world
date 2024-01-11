@@ -19,7 +19,10 @@ public interface UserMapper {
             """)
     UserEntity selectUserExist(@Param("username") String username);
 
-
+    @Select("""
+            select * from user where email = #{email}
+            """)
+    UserEntity selectUserExistByMail(@Param("email") String email);
     @Select("""
             select * from user where id = #{id}
             """)

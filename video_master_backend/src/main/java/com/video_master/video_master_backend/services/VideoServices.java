@@ -2,9 +2,11 @@ package com.video_master.video_master_backend.services;
 
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
+import com.video_master.video_master_backend.model.entity.VideoImgAndVideoInsertEntity;
 import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
 import com.video_master.video_master_backend.model.vo.VideoCategoryVo;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
+import com.video_master.video_master_backend.model.vo.VideoUploadVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -40,7 +42,9 @@ public interface VideoServices {
 
     VideoPlayerVo getPlayerVideoByIdAndCurrentEpisode(Integer id, Integer currentEpisode);
 
-    Boolean writeFileToDisk(MultipartFile ...files);
+    VideoImgAndVideoInsertEntity writeFileToDisk(MultipartFile ...files);
+
+    Boolean uploadFile(VideoUploadVo vo,MultipartFile ...files);
 
     VideoCategoryVo getVideoCategory();
 

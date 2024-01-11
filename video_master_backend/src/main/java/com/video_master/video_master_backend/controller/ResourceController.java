@@ -7,6 +7,7 @@ import com.video_master.video_master_backend.model.dto.VideoSearchedListDTO;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
 import com.video_master.video_master_backend.model.vo.VideoCategoryVo;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
+import com.video_master.video_master_backend.model.vo.VideoUploadVo;
 import com.video_master.video_master_backend.model.vo.VideoVo;
 import com.video_master.video_master_backend.services.VideoServices;
 import com.video_master.video_master_backend.util.JackonUtil;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.VarHandle;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -94,15 +96,18 @@ public class ResourceController {
     @GetMapping("/getPlayingCorrect")
     public String getPlayingCorrect(@RequestParam Map<String, String> params) {
         List<String> paramList = params.values().stream().toList();
+        log.info(paramList.toString());
         VideoPlayerVo playerVideo = videoServices.getPlayerVideoByIdAndCurrentEpisode(Integer.parseInt(paramList.get(0)), Integer.parseInt(paramList.get(1)));
         return JackonUtil.ObjectToJSON(playerVideo);
     }
 
     @PostMapping("/videoUpload")
     public Boolean videoUpload(@RequestPart("video") MultipartFile video,
-                              @RequestPart("image") MultipartFile image) throws IOException {
+                              @RequestPart("image") MultipartFile image,
+                              @RequestParam("jsonData") String videoData) {
+        VideoUploadVo videoVo = JackonUtil.JsonToObject(videoData, VideoUploadVo.class);
 
-        return videoServices.writeFileToDisk(video,image);
+        return videoServices.uploadFile(videoVo,image,video);
     }
 
     @GetMapping("/getVideoCategory")

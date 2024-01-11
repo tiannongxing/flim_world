@@ -1,6 +1,6 @@
 <script setup>
 import {useRoute} from "vue-router";
-import {nextTick, onBeforeMount, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
+import {computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
 import {EnterOutlined} from "@ant-design/icons-vue";
 import "video.js/dist/video-js.css"
 import videojs from "video.js";
@@ -9,6 +9,7 @@ import CommentReply from "../components/CommentReply.vue";
 import {SERVER_IP} from "../const_param.js";
 import {getMessageSender} from "../utils/MessageSender.js";
 import messageObj from "../utils/messageObj.js";
+import store from "../store/store.js";
 
 
 const videoPlayer = ref(null)
@@ -21,7 +22,7 @@ let callIp = ref(SERVER_IP)
 // 匿名用户以当前时间戳作为用户id
 let uid = ref(new Date().getTime())
 let movieId = ref(0)
-
+const localUser = ref('');
 let messageSet = reactive([])
 let messageContent = ref({
   senderId: '',
@@ -31,6 +32,7 @@ let messageContent = ref({
   content: ''
 })
 onBeforeMount(() => {
+  localUser.value = JSON.parse(JSON.stringify(store.state.userState.user));
   // 通过页面传输消息获得影片播放相关信息
   let messageSender = getMessageSender("/video-master/resource/getPlayingCorrect",
       new messageObj("movieId", query.movieId).getObject(),
@@ -64,7 +66,12 @@ onBeforeMount(() => {
   })
 
 })
+
 onMounted(() => {
+  if (JSON.stringify(localUser.value) !== '{}'){
+    console.log(localUser.value)
+    uid.value = localUser.value.id;
+  }
   //配置websocket 后端要注意跨域问题
   ws.value = new WebSocket(`ws://${callIp.value}/video-master/websocket?uid=${encodeURIComponent(uid.value)}&roomId=${movieId.value}`) //服务器地址
 
@@ -112,7 +119,7 @@ onBeforeUnmount(() => {
 
 let socketSender = () => {
   messageContent.value.senderId = uid
-  messageContent.value.senderName = '测试用户'
+  messageContent.value.senderName = JSON.stringify(localUser.value) === '{}'?'游客'+uid.value:localUser.value.nickname
   messageContent.value.content = sendMsg.value
   messageContent.value.roomId = movieId.value.toString()
   messageContent.value.time = new Date().toLocaleTimeString()

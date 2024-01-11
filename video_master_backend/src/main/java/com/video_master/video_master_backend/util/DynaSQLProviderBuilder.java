@@ -82,8 +82,8 @@ public class DynaSQLProviderBuilder {
                         videos.img_src
                         """);
                 FROM("video_detail");
-                LEFT_OUTER_JOIN("videos on videos.id = video_detail.id");
-                WHERE("video_detail.id = #{id} and video_detail.episode = #{episode}");
+                LEFT_OUTER_JOIN("videos on videos.id = video_detail.pid");
+                WHERE("videos.id = #{id} and video_detail.episode = #{episode}");
             }
         }.toString();
     }

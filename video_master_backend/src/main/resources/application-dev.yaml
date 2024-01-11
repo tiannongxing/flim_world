@@ -4,7 +4,7 @@ spring:
   #配置mysql数据库 关系型数据库 并设置事务自动提交
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/vedio-master?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&autoCommit=true
+    url: jdbc:mysql://localhost:3306/vedio-master?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&useUnicode=true&autoCommit=true
     username: root
     password: opr416
 

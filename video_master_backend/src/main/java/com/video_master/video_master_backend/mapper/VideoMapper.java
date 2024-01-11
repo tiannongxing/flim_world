@@ -81,9 +81,40 @@ public interface VideoMapper {
             select location_name from video_location
             """)
     List<String> getAllLocation();
+
+    @Insert("""
+            insert into video_category VALUES(#{vid},(select id from category where pid = (select id from category where category_name = #{pname}) AND category_name = #{cname}));
+            """)
+    void insertSubCategory(@Param("vid")Integer vid,@Param("pname") String pname,@Param("cname") String cname);
+
+
     //使用存储过程方式 只需调用存储过程和传入参数
     @Select("CALL query_video_by_id(#{rowId})")
     VideoEntity getVideoById(@Param("rowId") int rowId);
+
+    @Select({
+            "CALL insert_video_proc(",
+            "#{params.input_name, jdbcType=VARCHAR, mode=IN},",
+            "#{params.input_total_episode, jdbcType=INTEGER, mode=IN},",
+            "#{params.input_img_src, jdbcType=VARCHAR, mode=IN},",
+            "#{params.input_starring, jdbcType=VARCHAR, mode=IN},",
+            "#{params.input_description, jdbcType=VARCHAR, mode=IN},",
+            "#{params.input_type_str, jdbcType=VARCHAR, mode=IN},",
+            "#{params.input_location_str, jdbcType=VARCHAR, mode=IN},",
+            "#{params.input_publish_date, jdbcType=VARCHAR, mode=IN},",
+            "#{params.output_pid, jdbcType=INTEGER, mode=OUT})"
+    })
+    @Options(statementType = StatementType.CALLABLE)
+    void insertVideoProc(@Param("params") Map<String, Object> params);
+
+    @Insert("""
+            CALL insert_video_detail_proc(
+            #{title, jdbcType=VARCHAR, mode=IN},
+            #{episode, jdbcType=VARCHAR, mode=IN},
+            #{file_name, jdbcType=VARCHAR, mode=IN},
+            #{pid, jdbcType=INTEGER, mode=IN});
+            """)
+    void insertVideoDetail(@Param("title")String title,@Param("episode")Integer episode,@Param("file_name")String fileName,@Param("pid") Integer pid);
 
     // 对于实在没有办法使用注解处理的使用原始的xml来进行开发
     List<VideoEntity> getVideos(Map<String,String> params);

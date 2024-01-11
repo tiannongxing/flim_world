@@ -6,9 +6,11 @@ import com.video_master.video_master_backend.model.dto.VideoPlayerDTO;
 import com.video_master.video_master_backend.model.dto.VideoSearchedDTO;
 import com.video_master.video_master_backend.model.entity.VideoCategoryEntity;
 import com.video_master.video_master_backend.model.entity.VideoEntity;
+import com.video_master.video_master_backend.model.entity.VideoImgAndVideoInsertEntity;
 import com.video_master.video_master_backend.model.entity.VideoPlayerEntity;
 import com.video_master.video_master_backend.model.vo.VideoCategoryVo;
 import com.video_master.video_master_backend.model.vo.VideoPlayerVo;
+import com.video_master.video_master_backend.model.vo.VideoUploadVo;
 import com.video_master.video_master_backend.services.VideoServices;
 import com.video_master.video_master_backend.util.FtpUtil;
 import com.video_master.video_master_backend.util.VideosAttributes;
@@ -20,10 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongFunction;
 
@@ -125,15 +124,18 @@ public class VideoServicesImpl implements VideoServices {
     }
 
     @Override
-    public Boolean writeFileToDisk(MultipartFile... files) {
+    public VideoImgAndVideoInsertEntity writeFileToDisk(MultipartFile... files) {
         AtomicReference<Boolean> success = new AtomicReference<>(false);
+        VideoImgAndVideoInsertEntity videoImgAndVideoInsertEntity = new VideoImgAndVideoInsertEntity();
         Arrays.stream(files).forEach(file -> {
             // 匹配文件格式并避免乱码问题
             String remoteFilePath = "";
             if (file.getContentType().matches(IMG_REG)) {
                 remoteFilePath = "imgs/resources/";
+                videoImgAndVideoInsertEntity.setImgSrc(file.getOriginalFilename());
             } else if (file.getContentType().matches(VIDEO_REG)) {
                 remoteFilePath = "video/resources/";
+                videoImgAndVideoInsertEntity.setVideoSrc(file.getOriginalFilename());
             }
             try (InputStream inputStream = file.getInputStream()) {
 
@@ -149,7 +151,7 @@ public class VideoServicesImpl implements VideoServices {
         });
 
 
-        return success.get();
+        return videoImgAndVideoInsertEntity;
     }
 
     @Override
@@ -163,6 +165,38 @@ public class VideoServicesImpl implements VideoServices {
     @Override
     public List<String> getLocations() {
         return videoMapper.getAllLocation();
+    }
+
+    @Override
+    public Boolean uploadFile(VideoUploadVo vo, MultipartFile... files) {
+        VideoImgAndVideoInsertEntity entity = writeFileToDisk(files);
+        if (!Objects.equals(entity,null)){
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("input_name",vo.getVideoName());
+            map.put("input_total_episode",vo.getTotalEpisode());
+            map.put("input_img_src",entity.getImgSrc());
+            map.put("input_starring",vo.getStarring());
+            map.put("input_description",vo.getDescription());
+            map.put("input_type_str",vo.getType());
+            map.put("input_location_str",vo.getLocation());
+            map.put("input_publish_date",vo.getPublishDate().split("-")[0]);
+            map.put("output_pid", null);  // 添加输出参数的占位符
+
+            videoMapper.insertVideoProc(map);
+            Integer vid = Integer.parseInt(String.valueOf(map.get("output_pid")));
+
+            if(!Objects.equals(map.get("output_id"),0)){
+                // 接收到返回的插入新影片id或原有id 插入新的子分类的影片详情
+                vo.getSubType().stream().forEach( item -> {
+                    videoMapper.insertSubCategory(vid,vo.getType(),item);
+                });
+                videoMapper.insertVideoDetail(vo.getVideoName(),Integer.valueOf(vo.getCurrentEpisode()),entity.getVideoSrc(), vid);
+            }
+            return true;
+        }else{
+            return false;
+        }
+
     }
 }
 

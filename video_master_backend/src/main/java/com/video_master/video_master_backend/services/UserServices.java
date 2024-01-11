@@ -15,7 +15,7 @@ public interface UserServices {
 
     Map<String,Object> UserCertificationByPassword(UserLoginByPasswordVo vo);
 
-    Map<String,UserEntity> UserCertificationByMail(UserLoginByMailVo vo);
+    Map<String,Object> UserCertificationByMail(UserLoginByMailVo vo);
 
     Map<String,UserEntity> UserCertificationByToken(String token);
     UserEntity getUserById(String id);

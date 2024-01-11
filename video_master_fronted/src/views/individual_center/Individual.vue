@@ -70,7 +70,6 @@ onBeforeUnmount(() => {
 })
 
 onMounted(() => {
-  // localStorage.removeItem("token")
   let token = localStorage.getItem("token")
   if (token) {
     // 如果token存在，则向后端发送请求，获取数据
